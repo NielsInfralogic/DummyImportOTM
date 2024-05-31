@@ -1,0 +1,275 @@
+object FormSetProFinish: TFormSetProFinish
+  Left = 474
+  Height = 543
+  Top = 224
+  Width = 971
+  Caption = 'Setup finish product'
+  ClientHeight = 543
+  ClientWidth = 971
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.0.2.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 0
+    Width = 971
+    Align = alTop
+    Caption = 'Setup product "Ready to send to workflow"'
+    TabOrder = 0
+    Wordwrap = True
+  end
+  object GroupBox1: TGroupBox
+    Left = 5
+    Height = 442
+    Top = 55
+    Width = 390
+    Align = alClient
+    BorderSpacing.Around = 5
+    Caption = 'Rules'
+    ClientHeight = 422
+    ClientWidth = 386
+    TabOrder = 1
+    object lwRules: TListView
+      Left = 0
+      Height = 398
+      Top = 24
+      Width = 386
+      Align = alClient
+      AutoSort = False
+      Checkboxes = True
+      Columns = <      
+        item
+          Caption = 'Name'
+          MinWidth = 80
+          Width = 80
+        end      
+        item
+          Caption = 'ProName'
+        end      
+        item
+          Caption = 'Day'
+        end      
+        item
+          Caption = 'Section'
+          MinWidth = 80
+          Width = 80
+        end      
+        item
+          Caption = 'Zone'
+          MinWidth = 80
+          Width = 80
+        end      
+        item
+          Caption = 'Edition'
+          MinWidth = 80
+          Width = 80
+        end>
+      RowSelect = True
+      TabOrder = 0
+      ViewStyle = vsReport
+      OnSelectItem = lwRulesSelectItem
+    end
+    object ToolBar1: TToolBar
+      Left = 0
+      Height = 24
+      Top = 0
+      Width = 386
+      AutoSize = True
+      Caption = 'ToolBar1'
+      Images = Form1.il16x16
+      TabOrder = 1
+      object ToolButton1: TToolButton
+        Left = 1
+        Top = 2
+        Caption = 'ToolButton1'
+        ImageIndex = 12
+        OnClick = ToolButton1Click
+      end
+      object ToolButton2: TToolButton
+        Left = 24
+        Top = 2
+        Caption = 'ToolButton2'
+        ImageIndex = 11
+        OnClick = ToolButton2Click
+      end
+    end
+  end
+  object cgSections: TCheckGroup
+    Left = 638
+    Height = 442
+    Top = 55
+    Width = 61
+    Align = alRight
+    AutoFill = True
+    AutoSize = True
+    BorderSpacing.Around = 5
+    Caption = 'Section:'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    Constraints.MaxWidth = 80
+    OnItemClick = cgSectionsItemClick
+    TabOrder = 2
+  end
+  object Panel2: TPanel
+    Left = 570
+    Height = 447
+    Top = 50
+    Width = 63
+    Align = alRight
+    BevelOuter = bvNone
+    Caption = 'Done at:'
+    Constraints.MinHeight = 80
+    TabOrder = 3
+  end
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 34
+    Top = 503
+    Width = 959
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    OKButton.OnClick = OKButtonClick
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    ButtonOrder = boCloseCancelOK
+    TabOrder = 4
+    OnClick = ButtonPanel1Click
+    ShowButtons = [pbOK, pbCancel]
+  end
+  object cgZones: TCheckGroup
+    Left = 704
+    Height = 442
+    Top = 55
+    Width = 49
+    Align = alRight
+    AutoFill = True
+    AutoSize = True
+    BorderSpacing.Around = 5
+    Caption = 'Zone:'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    OnItemClick = cgZonesItemClick
+    TabOrder = 5
+  end
+  object cgEditions: TCheckGroup
+    Left = 758
+    Height = 442
+    Top = 55
+    Width = 64
+    Align = alRight
+    AutoFill = True
+    AutoSize = True
+    BorderSpacing.Around = 5
+    Caption = 'Editions:'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    OnItemClick = cgEditionsItemClick
+    TabOrder = 6
+  end
+  object CheckGroup1: TCheckGroup
+    Left = 485
+    Height = 442
+    Top = 55
+    Width = 80
+    Align = alRight
+    AutoFill = True
+    AutoSize = True
+    BorderSpacing.Around = 5
+    Caption = 'Pub days'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 422
+    ClientWidth = 76
+    Constraints.MinWidth = 80
+    Items.Strings = (
+      'Mandag'
+      'Tirsdag'
+      'Onsdag'
+      'Torsdag'
+      'Fredag'
+      'Lørdag'
+      'Søndag'
+    )
+    OnItemClick = CheckGroup1ItemClick
+    TabOrder = 7
+    Data = {
+      0700000002020202020202
+    }
+  end
+  object ScrollBox1: TScrollBox
+    Left = 400
+    Height = 442
+    Top = 55
+    Width = 80
+    HorzScrollBar.Page = 1
+    HorzScrollBar.Visible = False
+    VertScrollBar.Page = 19
+    Align = alRight
+    AutoSize = True
+    BorderSpacing.Around = 5
+    BorderStyle = bsNone
+    ClientHeight = 442
+    ClientWidth = 80
+    Constraints.MinWidth = 80
+    TabOrder = 8
+    object rgproduct: TRadioGroup
+      Left = 0
+      Height = 442
+      Top = 0
+      Width = 80
+      Align = alClient
+      AutoFill = True
+      Caption = 'Product'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      OnClick = rgproductClick
+      TabOrder = 0
+    end
+  end
+  object Label1: TLabel
+    Left = 827
+    Height = 442
+    Top = 55
+    Width = 139
+    Align = alRight
+    AutoSize = False
+    BorderSpacing.Around = 5
+    Caption = #13#10'These rules can "Stop" NOT "Approve" a product to be transferd to CC.'#13#10#13#10'If a rule is created, all conditions must be met to return true.'#13#10#13#10'If no rule are created, it will returned true.'
+    ParentColor = False
+    WordWrap = True
+  end
+end

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="11"/>
+    <BuildModes Active="Default"/>
+    <Units Count="6">
+      <Unit0>
+        <Filename Value="CrossAdImport.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos Y="23"/>
+        <UsageCount Value="185"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="umain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uMain"/>
+        <TopLine Value="1056"/>
+        <CursorPos X="25" Y="794"/>
+        <UsageCount Value="185"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="uconvert.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fConvert"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uConvert"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="652"/>
+        <CursorPos X="34" Y="693"/>
+        <UsageCount Value="181"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="usetprofinish.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormSetProFinish"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uSetProFinish"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="155"/>
+        <CursorPos X="27" Y="160"/>
+        <UsageCount Value="33"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\rtl\win32\system.pp"/>
+        <UnitName Value="System"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="16"/>
+        <UsageCount Value="78"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="C:\lazarus\lcl\include\listitem.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="179"/>
+        <CursorPos Y="197"/>
+        <UsageCount Value="5"/>
+      </Unit5>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="637" TopLine="612"/>
+      </Position1>
+      <Position2>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="638" TopLine="612"/>
+      </Position2>
+      <Position3>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="637" TopLine="612"/>
+      </Position3>
+      <Position4>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="638" TopLine="612"/>
+      </Position4>
+      <Position5>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="637" TopLine="612"/>
+      </Position5>
+      <Position6>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="638" TopLine="612"/>
+      </Position6>
+      <Position7>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="637" TopLine="612"/>
+      </Position7>
+      <Position8>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="639" TopLine="612"/>
+      </Position8>
+      <Position9>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="637" TopLine="612"/>
+      </Position9>
+      <Position10>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="638" TopLine="612"/>
+      </Position10>
+      <Position11>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="637" TopLine="612"/>
+      </Position11>
+      <Position12>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="631" Column="39" TopLine="612"/>
+      </Position12>
+      <Position13>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="632" Column="39" TopLine="613"/>
+      </Position13>
+      <Position14>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="631" Column="39" TopLine="612"/>
+      </Position14>
+      <Position15>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="630" Column="39" TopLine="611"/>
+      </Position15>
+      <Position16>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="629" Column="39" TopLine="610"/>
+      </Position16>
+      <Position17>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="632" Column="39" TopLine="613"/>
+      </Position17>
+      <Position18>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="631" Column="39" TopLine="612"/>
+      </Position18>
+      <Position19>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="632" Column="39" TopLine="613"/>
+      </Position19>
+      <Position20>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="633" Column="39" TopLine="614"/>
+      </Position20>
+      <Position21>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="634" Column="39" TopLine="615"/>
+      </Position21>
+      <Position22>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="636" Column="39" TopLine="617"/>
+      </Position22>
+      <Position23>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="737" Column="3" TopLine="734"/>
+      </Position23>
+      <Position24>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="738" Column="3" TopLine="735"/>
+      </Position24>
+      <Position25>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="739" Column="3" TopLine="736"/>
+      </Position25>
+      <Position26>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="746" Column="3" TopLine="743"/>
+      </Position26>
+      <Position27>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="572" Column="3" TopLine="570"/>
+      </Position27>
+      <Position28>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="580" Column="3" TopLine="570"/>
+      </Position28>
+      <Position29>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="658" TopLine="644"/>
+      </Position29>
+      <Position30>
+        <Filename Value="uconvert.pas"/>
+        <Caret Line="671" Column="13" TopLine="646"/>
+      </Position30>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="0" ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+  <Debugging>
+    <Watches Count="1">
+      <Item1>
+        <Expression Value="SLSecRem[x]"/>
+      </Item1>
+    </Watches>
+  </Debugging>
+</CONFIG>
