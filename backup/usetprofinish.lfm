@@ -142,7 +142,7 @@ object FormSetProFinish: TFormSetProFinish
     CloseButton.DefaultCaption = True
     CancelButton.Name = 'CancelButton'
     CancelButton.DefaultCaption = True
-    ButtonOrder = boCloseCancelOK
+    ButtonOrder = boCloseOKCancel
     TabOrder = 4
     OnClick = ButtonPanel1Click
     ShowButtons = [pbOK, pbCancel]

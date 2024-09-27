@@ -8,7 +8,7 @@ object FormSetProFinish: TFormSetProFinish
   ClientWidth = 971
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.0.2.0'
+  LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
     Height = 50
@@ -77,7 +77,6 @@ object FormSetProFinish: TFormSetProFinish
       Width = 386
       AutoSize = True
       Caption = 'ToolBar1'
-      Images = Form1.il16x16
       TabOrder = 1
       object ToolButton1: TToolButton
         Left = 1

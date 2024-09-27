@@ -14,6 +14,7 @@ implementation
 Uses
   uMain;
 
+
 function CreateNewPro(Pubdate : TDate; ProID : Integer; ShortName : String) : Integer ;
 var
   DefLongName, DefShortName, DefOutputAlias,
@@ -274,6 +275,31 @@ Begin
       Result := Que1.FieldByName('ID').AsInteger;
       fMain.SQLTrans.commit;
 
+      Que1.Close;
+
+
+      // 2024-07-05 - fix hovedprodukt hvis dette er et weekendtillæg der ved en fejl er lagt ind som B-sektion i hovedprodukt
+      //              Store proc fjerner B-sektion fra hovedproduktet.
+      if (Result > 0) then
+      begin
+        try
+           Que1.SQL.Text := 'EXEC spPostCreate ' + IntToStr(Result);
+          // Que1.SQL.Text := 'call spPostCreate(:param1)';
+          // Que1.Params.BeginUpdate;
+           //Que1.Params.ParamByName('param1').AsInteger := Result;
+           // Que1.Params.EndUpdate;
+           Que1.ExecSQL;
+           fMain.EventLog.Debug('Called spPostCreate( ' + IntToStr(Result) + ')');
+        except
+          on E: Exception do
+          begin
+             fMain.EventLog.Debug('call spPostCreate error: ' + E.Message);
+           end;
+        end;
+
+      end;
+
+
       {If DefPakTemplate > 0 then
         MakePakMat(Result, DefPakTemplate);}
 
@@ -282,8 +308,8 @@ Begin
   except
     on E: Exception do
     begin
-       {fMain.StatusBar.Items[3].Text := 'Fail to Create new plan. ' + E.Message;
-       EventLog.Error('Create New product fail.' + E.Message);}
+       {fMain.StatusBar.Items[3].Text := 'Fail to Create new plan. ' + E.Message; }
+       fMain.EventLog.Error('Create New product fail.' + E.Message);
      end;
   end;
 end;

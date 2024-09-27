@@ -266,7 +266,9 @@ begin
       LI.SubItems.Add(INI.ReadString(SL[i], 'Edition', ''));
     end;
     For i := 0 to lwRules.ColumnCount - 1 do
-      lwRules.Column[i].Width := -2;
+      // ### NAN 2024-08-20 - compile-fejl med -2
+      // lwRules.Column[i].Width := -2;
+      lwRules.Column[i].Width := 0;
     lwRules.EndUpdate;
 
     Que.Close;

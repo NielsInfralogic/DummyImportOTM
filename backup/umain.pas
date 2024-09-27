@@ -11,32 +11,15 @@ uses
   INIfiles,
   BlowFish,
   LConvEncoding,
-  RegExpr,
+  RegExpr, fileinfo,
   uConvert, CreatePro,
   uSetProFinish;
 
 type
 
-   // ### NAN 2024-05-30
-
-  TImportProductSection = Record
-    SectionName : String;
-    PageCount : Integer;
-    SectionRemark : String;
-  end;
-
-  TImportProduct = Record
-    PubName      : String;
-    PubDate      : TDate;
-    Editions     : Array of String;
-    Sections     : Array of TImportProductSection;
-    PageFormat   : String;
-  end;
-
-  // ### end
-
   TPro = Record
     PubName        : String;
+    ShortName      : String;
     Zone           : String;
     Edition        : String;
     Section        : String;
@@ -73,6 +56,15 @@ type
     CreateMissing : Boolean;
     AppendCopyCount : Boolean;
     PartCopyCount : Boolean;
+
+    // ### NAN 2024-08-20 - nye felter for vendesektion
+    IsTurnSection : Boolean;
+    IsTurnSectionMaster : Boolean;
+    TurnSectionMaster : String;
+    PageType : String;
+
+    Enabled : Boolean;
+    // ###
   end;
 
 
@@ -81,6 +73,10 @@ type
    ConvEdi : Array of TConv;
    ConvSec : Array of TConv;
    Rules : Array of TRules;
+   DefaultTurnSectionName: string;
+   DefaultTrimRipSetup : string;
+   DefaultTrimFormatW : Integer;
+   DefaultTrimFormatH : Integer;
   end;
 
   TSystem = Record
@@ -112,6 +108,7 @@ type
   TNames = Record
     Zone : Array of TPPMNameId;
     Editions : Array of TPPMNameId;
+    RipSetups : Array of TPPMNameId;
   end;
 
   { TConfig }
@@ -148,7 +145,6 @@ type
     Timer1: TTimer;
     ToolBar1: TToolBar;
     ToolButton1: TToolButton;
-    ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     tbSimulate: TToolButton;
     tbStatus: TToolButton;
@@ -156,11 +152,12 @@ type
     ToolButton5: TToolButton;
     ToolButton6: TToolButton;
     ToolButton7: TToolButton;
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure tbStatusClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
-    procedure ToolButton2Click(Sender: TObject);
+
     procedure ToolButton3Click(Sender: TObject);
     procedure tbSimulateClick(Sender: TObject);
     procedure ToolButton7Click(Sender: TObject);
@@ -171,10 +168,12 @@ type
     function IDToZone(IValue: Integer): String;
     procedure ReadConfig;
     function ReadyToSendtToCC(PPMID: Integer; CheckRem: Boolean): Boolean;
-    procedure WriteLog(TextMsg: string);
-    function ZoneToID(NameValue: String): Integer;
 
+    function ZoneToID(NameValue: String): Integer;
+    function RipSetupToID(NameValue: String): Integer;
+    procedure WriteLog(TextMsg: string);
   public
+
     Config : TConfig;
 
   end;
@@ -185,6 +184,7 @@ var
 
 Const
   EncryptKey = 'Infra2Logic';
+  StableTime = 2000;
 
 implementation
 
@@ -239,6 +239,16 @@ Begin
   For i := 0 to Length(Config.Names.Zone) - 1 do
     If COnfig.Names.Zone[i].Name = NameValue then
       Result := Config.Names.Zone[i].Id;
+end;
+
+function TfMain.RipSetupToID(NameValue: String): Integer;
+var
+  i: Integer;
+Begin
+  Result := 0;  //!!
+  For i := 0 to Length(Config.Names.RipSetups) - 1 do
+    If COnfig.Names.RipSetups[i].Name = NameValue then
+      Result := Config.Names.RipSetups[i].Id;
 end;
 
 
@@ -385,7 +395,7 @@ Begin
           End;
         end;
 
-        If Found then //Er der en regl, ellers ud
+        If Found then //Er der en regel, ellers ud
         Begin
           //Check sektioner
           If SLRSec.Count > 0 Then
@@ -488,18 +498,19 @@ end;
 procedure TfMain.DoImport;
 var
   MyFiles,
-    Pro_PageCount, Pro_SecName, Pro_SecRem, Pro_SecUnique,
+    Pro_PageCount, Pro_SecName, Pro_SecRem, Pro_SecUnique, Pro_SecSpec,
     SLPageName, SLSecName, SLUnqName, SLSecRem, SL, MyFile: TStringList;
   i, NoOfPages, PrintingStart, NumberOfCopies, PrintingEnd, x,
-    SecCount, s, se, r, t, j, p, Total, y, z, n, rs, fl, rr, pp: Integer;
+    SecCount, s, se, r, t, j, p, Total, y, z, n, rs, fl, rr, pp,RipScalingID: Integer;
   Tmps1, Tmps2, Tmps3, Tmps4, TmpSec, NewF,
     NewE, TmpZone, Tmps, ss: String;
-  ProOK, DoChanges, b: Boolean;
+  ProOK, DoChanges, b, ProSecSpecUsed, NewProduct: Boolean;
   PubDate: TDateTime;
   Que, Que1, Que2: TSQLQuery;
   PPMID: LongInt;
   RegexObj: TRegExpr;
   Pro : Array of TPro;
+  locked : Boolean;
 Begin
   Try
     Que := TSQLquery.Create(nil);
@@ -519,6 +530,8 @@ Begin
     RegexObj := TRegExpr.Create;
 
     Try
+
+
       FindAllFiles(MyFiles, Config.System.InputPath, '*.txt', False);
 
       If MyFiles.Count > 0 then
@@ -526,26 +539,40 @@ Begin
         WriteLog('Fundet ' + IntToSTr(MyFiles.Count) + ' filer.');
         EventLog.Debug('Antal filer: ' + IntToSTr(MyFiles.Count));
 
+        // ### NAN Stable time..simplet.
+        if (StableTime > 0) then
+          Sleep(StableTime);
+
         for i := 0 to MyFiles.Count - 1 do
         begin
+
           WriteLog('Fil: ' + MyFiles[i]);
           EventLog.Debug('Fil navn: ' + MyFiles[i]);
 
           Setlength(Pro, 0);
 
           //Get pubdate from file name
+          try
+
           RegexObj.Expression := '\w*_(\d+)-(\d+)-(\d+)';
           if RegexObj.Exec(ExtractFilename(MyFiles[i])) then
-            Pubdate := EncodeDate(StrToIntDef(RegexObj.Match[1], 1), StrToIntDef(RegexObj.Match[2], 1), StrToIntDef(RegexObj.Match[3], 1)) else
+            Pubdate := EncodeDate(StrToIntDef(RegexObj.Match[1], 1), StrToIntDef(RegexObj.Match[2], 1), StrToIntDef(RegexObj.Match[3], 1))
+          else
             PubDate := 0;
-
+           except
+              WriteLog('Illegal pubdate dato i filnavn ' + Pro[p].FileName);
+             end;
           //Filter
+
+
           RegexObj.Expression := Config.System.FileFilter;
           if RegexObj.Exec(ExtractFilename(MyFiles[i]) + '.' + ExtractFileExt(MyFiles[i])) then
           Begin
+            WriteLog('Fil match ok for ' + MyFiles[i]);
             MyFile.LoadFromFile(MyFiles[i]);
             For fl := 0 to MyFile.Count - 1 do
             Begin
+
               //Væk med alle alle ugyldige linjer
               If (Length(Trim(MyFile[fl])) < 108) or (Copy(MyFile[fl],1,1) = '-') then
                 Continue;
@@ -563,6 +590,24 @@ Begin
               Pro[p].ProOK          := False;
               Pro[p].FileName       := Trim(ISO_8859_15ToUTF8(Copy(MyFile[fl], 95, 14)));
 
+              // ### NAN 2024-08-21 - Tag pubname/sektion/pubdate/format fra filnavn..
+              // ILA20240501E1A
+              // 12345678901234
+              Pro[p].ShortName := UTF8Uppercase(Copy(Pro[p].FileName,1,3));
+              Pro[p].Section := Copy(Pro[p].FileName,14,1);
+              try
+                Pro[p].PubDate := EncodeDate(StrToIntDef(Copy(Pro[p].FileName,4,4), 1), StrToIntDef(Copy(Pro[p].FileName,8,2), 1), StrToIntDef(Copy(Pro[p].FileName,10,2), 1))
+              except
+                 WriteLog('Illegal pubdate dato i filnavn ' + Pro[p].FileName);
+              end;
+              If (Uppercase(Copy(Pro[p].FileName, 12,1)) = 'T') then
+                Pro[p].Trim := True
+              else
+                Pro[p].Trim := False;
+              // ###
+
+
+
               For x := 0 to length(Config.Convert.ConvZone) - 1 do
                 If (Uppercase(Pro[p].Zone) = Uppercase(Config.Convert.ConvZone[x].Key)) then
                 Begin
@@ -577,11 +622,6 @@ Begin
                   WriteLog('Konverterer edition til: ' + Pro[p].Edition);
                 end;
 
-              If (Uppercase(Copy(Pro[p].FileName, 12,1)) = 'T') then
-                Pro[p].Trim := True else
-                Pro[p].Trim := False;
-
-
               //Check om Edition er valid
               Que.Close;
               Que.SQL.Text := 'Select top 1 ID from EDITIONSNAME';
@@ -592,42 +632,53 @@ Begin
                 WriteLog('Ukendt edition navn: ' + Pro[p].Edition + '. Sættes til 1');
                 Pro[p].Edition := '1';
               end;
+              Que.Close;
             End;
             //ALt i filen indlæst
+
+
 
             //Sortere hvis der er nogle der skal sættes sammen
             For p := 0 to Length(Pro) - 1 do
             Begin
               For r := 0 to Length(Config.Convert.Rules) - 1 do
               Begin
-                If (UTF8Uppercase(Pro[p].PubName) = UTF8Uppercase(Config.Convert.Rules[r].fName)) and
-                   (Config.Convert.Rules[r].PartCopyCount) Then
-                Begin
-                  For rr := 0 to Length(Config.Convert.Rules) - 1 do
+                if (Config.Convert.Rules[r].Enabled) then   // ### NAN 2024-09-03 <- test om enablet
+                begin
+                  // ### NAN 2024-07-09 - også søg med shortname
+                  If ( (UTF8Uppercase(Pro[p].PubName) = UTF8Uppercase(Config.Convert.Rules[r].fName)) OR (Pro[p].ShortName = UTF8Uppercase(Config.Convert.Rules[r].fName))) and
+                     (Config.Convert.Rules[r].PartCopyCount) Then
                   Begin
-                    If (Config.Convert.Rules[r].tName[0] = Config.Convert.Rules[rr].tName[0]) and (Config.Convert.Rules[rr].AppendCopyCount) Then
+                    For rr := 0 to Length(Config.Convert.Rules) - 1 do
                     Begin
-                      For pp := 0 to Length(Pro) - 1 do
-                      Begin
-                        If UTF8Uppercase(Pro[pp].PubName) = UTF8Uppercase(Config.Convert.Rules[rr].fName) then
+                      if (Config.Convert.Rules[rr].Enabled) then   // ### NAN 2024-09-03 <- test om enablet
+                      begin
+                        If (Config.Convert.Rules[r].tName[0] = Config.Convert.Rules[rr].tName[0]) and (Config.Convert.Rules[rr].AppendCopyCount) Then
                         Begin
-                          Pro[p].NoOfPages := Pro[p].NoOfPages + Pro[pp].NoOfPages;
-                          Pro[pp].PubName:= '';
+                          For pp := 0 to Length(Pro) - 1 do
+                          Begin
+                            If UTF8Uppercase(Pro[pp].PubName) = UTF8Uppercase(Config.Convert.Rules[rr].fName) then
+                            Begin
+                              Pro[p].NoOfPages := Pro[p].NoOfPages + Pro[pp].NoOfPages;
+                              Pro[pp].PubName:= '';
+                            End;
+                          End;
                         End;
-                      End;
+                      end;
                     End;
                   End;
-                End;
+                end;
               End;
             end;
 
             WriteLog('---- Seach for rules. ----');
 
-            //Er der en regl
+            //Er der en regel
             For p := 0 to Length(Pro) - 1 do
             Begin
               If Pro[p].PubName <> '' then
               Begin
+                NewProduct := false;
                 WriteLog('');
                 WriteLog('----------------------------------------------------------------------------------');
                 WriteLog('Produkt fundet i fil: ' + Pro[p].PubName + ', ' + FormatDatetime('dd.mm YYYY', Pro[p].PubDate) + ', sektion: ' + Pro[p].Section);
@@ -635,366 +686,455 @@ Begin
                 //Er der rules for denne?
                 For r := 0 to Length(Config.Convert.Rules) - 1 do
                 Begin
-                  If (UTF8Uppercase(Pro[p].PubName) = UTF8Uppercase(Config.Convert.Rules[r].fName)) and
-                     ((Config.Convert.Rules[r].fZone = '') or (Uppercase(Pro[x].Zone)   = Uppercase(Config.Convert.Rules[r].fZone))) And
-                     ((Config.Convert.Rules[r].fEdi = '') or (Uppercase(Pro[x].Edition) = Uppercase(Config.Convert.Rules[r].fEdi))) then
-                  Begin
-                    If (Uppercase(Pro[p].Section) = Uppercase(Config.Convert.Rules[r].fSec)) or (Config.Convert.Rules[r].fSec = '') then
-                    Begin //Den skal rules
-                      WriteLog('Regl fundet: ' + Config.Convert.Rules[r].fName);
-                      Pro[p].PubName := Config.Convert.Rules[r].tName[0];
-                      If (Length(Config.Convert.Rules[r].tZone) > 0) and (Config.Convert.Rules[r].tZone[0] <> '') then
-                        Pro[p].Zone := Config.Convert.Rules[r].tZone[0];
-                      If (Length(Config.Convert.Rules[r].tSec) > 0) and (Config.Convert.Rules[r].tSec[0] <> '') then
-                        Pro[p].Section := Config.Convert.Rules[r].tSec[0];
+                  if (Config.Convert.Rules[r].Enabled) then   // ### NAN 2024-09-03 <- test om enablet
+                  begin
+                    // ### NAN 2024-07-09 - også søg med shortname
+                    If ((UTF8Uppercase(Pro[p].PubName) = UTF8Uppercase(Config.Convert.Rules[r].fName)) OR  (Pro[p].ShortName = UTF8Uppercase(Config.Convert.Rules[r].fName))) and
+                     //  ((Config.Convert.Rules[r].fZone = '') or (Uppercase(Pro[x].Zone)   = Uppercase(Config.Convert.Rules[r].fZone))) And
+                     // ((Config.Convert.Rules[r].fEdi = '') or (Uppercase(Pro[x].Edition) = Uppercase(Config.Convert.Rules[r].fEdi))) then
+                      ((Config.Convert.Rules[r].fZone = '') or (Uppercase(Pro[p].Zone)   = Uppercase(Config.Convert.Rules[r].fZone))) And               // ### index x->p
+                      ((Config.Convert.Rules[r].fEdi = '') or (Uppercase(Pro[p].Edition) = Uppercase(Config.Convert.Rules[r].fEdi))) And               // ### index x->p
 
-                      If not Config.Convert.Rules[r].Flying then
-                      Begin
-                        Que1.Close;
-                        Que1.SQL.Text := 'Select ID, Long_Name, Long_Name_Add, Short_Name, Udg_Dato, Pro_PageCount, Pro_SecName, Pro_SecRem, Zones, Pro_Editions_Unique from DATA';
-                        Que1.SQL.Add(   'Where CAST(UDG_DATO AS Date) = ''' + FormatDatetime('YYYY-MM-DD', Pro[p].PubDate) + '''');
-                        Que1.SQL.Add(   'And Short_Name = ''' + Pro[p].PubName + '''');
-                        Que1.SQL.Add(   'And Zones = ''' + IntToStr(ZoneToID(Pro[p].Zone)) + '''');
-                        //Que1.SQL.SaveToFile('301.sql');
-                        Que1.Open;
-
-                        If (Que1.RecordCount > 0) then
-                        Begin
-                          WriteLog('Produktion: ' + Pro[p].PubName + ', ' + FormatDatetime('dd.mm YYYY', Pro[p].PubDate));
-                        End else
-                        Begin
-                          If Config.Convert.Rules[r].CreateMissing then
-                          Begin
-                            PPMID := CreateNewPro(Pro[p].PubDate, 0, Pro[p].PubName);
-                            Que1.Close;
-                            Que1.SQL.Text := 'Select ID, Long_Name, Long_Name_Add, Short_Name, Udg_Dato, Pro_PageCount, Pro_SecName, Pro_SecRem, Zones, Pro_Editions_Unique from DATA';
-                            Que1.SQL.Add(   'Where ID = ''' + IntToStr(PPMID) + '''');
-                            //Que1.SQL.SaveToFile('302.sql');
-                            Que1.Open;
-                            WriteLog('Ny produktion oprettet: ' + Pro[p].PubName + ', ' + FormatDatetime('dd.mm YYYY', Pro[p].PubDate) + ' fra regl: ' + Config.Convert.Rules[r].fName);
-                          End else
-                          Begin
-                            PPMID:= -1;
-                            WriteLog('Produktion ikke fundet og oprettes ikke: ' + Pro[p].PubName + ', ' + FormatDatetime('dd.mm YYYY', Pro[p].PubDate) + ' fra regl: ' + Config.Convert.Rules[r].fName);
-                          End;
-                        End;
-      ;
-                        While not Que1.EOF do
-                        Begin //Den findes, opdatere
-                          DoChanges := False; //
-
-                          PPMID := Que1.FieldByName('ID').AsInteger;
-                          Pro_PageCount := TStringList.Create;
-                          Pro_PageCount.Delimiter := ',';
-                          Pro_SecName := TStringList.Create;
-                          Pro_SecName.Delimiter := ',';
-                          Pro_SecRem := TStringList.Create;
-                          Pro_SecRem.Delimiter := ',';
-                          Pro_SecUnique := TStringList.Create;
-                          Pro_SecUnique.Delimiter := ';';          //OBS OBS ";"
-                          Pro_SecUnique.StrictDelimiter := True;
-                          Pro_PageCount.DelimitedText := Que1.FieldByName('Pro_PageCount').AsString;
-                          Pro_SecName.DelimitedText   := Que1.FieldByName('Pro_SecName').AsString;
-                          Pro_SecRem.DelimitedText    := Que1.FieldByName('Pro_SecRem').AsString;
-                          Pro_SecUnique.DelimitedText := Que1.FieldByName('Pro_Editions_Unique').AsString;
-                          TmpS := Que1.FieldByName('Pro_Editions_Unique').AsString;
-
-                          // Først skal der evt rettes op i længde
-                          EventLog.Debug('Found ' + Que1.FieldByName('Short_Name').AsString  + ' in PPMID:' + IntToStr(PPMID));
-                          EventLog.Debug('Checking length before. Pro_PageCount=' + Pro_PageCount.CommaText +
-                                                           ' Pro_SecName=' + Pro_SecName.CommaText +
-                                                           ' Pro_SecRem=' + Pro_SecRem.CommaText +
-                                                           ' Pro_SecUnique=' + Pro_SecUnique.CommaText
-                                                           );
-
-                          t := Pro_PageCount.Count;
-                          While Pro_SecName.Count < t do
-                            Pro_SecName.Add('');
-
-                          While Pro_SecRem.Count < t do
-                            Pro_SecRem.Add('');
-
-                          While Pro_SecUnique.Count < t do
-                            Pro_SecUnique.Add('');
-
-                          While Pro_SecName.Count > t do
-                            Pro_SecName.Delete(Pro_SecName.Count - 1);
-
-                          While Pro_SecUnique.Count > t do
-                            Pro_SecUnique.Delete(Pro_SecUnique.Count - 1);
-
-                          While Pro_SecRem.Count > t do
-                            Pro_SecRem.Delete(Pro_SecRem.Count - 1);
-
-                          EventLog.Debug('Checking length after. Pro_PageCount=' + Pro_PageCount.CommaText +
-                                                         ' Pro_SecName=' + Pro_SecName.CommaText +
-                                                         ' Pro_SecRem=' + Pro_SecRem.CommaText +
-                                                         ' Pro_SecUnique=' + Pro_SecUnique.CommaText
-                                                         );
-                          j := Pro_SecName.IndexOf(Pro[p].Section);
-                          If j < 0 then
-                          Begin         //Sec er der ikke. opret.
-                            If (Pro_SecName.Count = 1) and (Pro_SecName[0] = '') then
-                            Begin
-                              Pro_SecName[0] := Pro[p].Section;
-                            end else
-                            Begin
-                              Pro_PageCount.Add('0');
-                              Pro_SecName.Add(Pro[p].Section);
-                              Pro_SecRem.Add('');
-                              Pro_SecUnique.Add('');
-
-                            end;
-                            j := Pro_SecName.IndexOf(Pro[p].Section);
-                            DoChanges := True;
-                            WriteLog('Sektion ' + Pro_SecName[j] + ' mangler i produkt. Oprettet.');
-                          End;
-
-                          If j >= 0 then //Og det skal den for pokker være
-                          Begin
-                            WriteLog('Sektion: [' + Pro_SecName[j] + '] fundet i ID:' + Que1.FieldByName('ID').AsString + ' ' + Que1.FieldByName('Long_Name').AsString + ' ' + Que1.FieldByName('Long_Name_Add').AsString + ' Zone ' + IdToZone(Que1.FieldByName('Zones').AsInteger) + ' Section ' + Pro_SecName[j]);
-
-                            If (Not Config.Convert.Rules[r].SetOnlyUnique) and (Pro_PageCount[j] <> IntToStr(Pro[p].NoOfPages)) then
-                            Begin
-                              DoChanges := True;
-                              WriteLog('Ændrer sidetal på sektion: ' + Pro_SecName[j] + ' ' + Pro_PageCount[j] + '->' + IntToStr(Pro[p].NoOfPages));
-                              If (Config.Convert.Rules[r].AppendCopyCount) then
-                              Begin
-                                Pro_PageCount[j] := IntToStr(StrToIntDef(Pro_PageCount[j], 0) + Pro[p].NoOfPages);
-                              End else
-                                Pro_PageCount[j] := IntToStr(Pro[p].NoOfPages);
-                            End;
-
-                            If Pro_PageCount[j] = '' Then
-                              Pro_PageCount[j] := '0';
-
-                            If (Config.Convert.Rules[r].SecRem <> '') and (Pro_SecRem[j] <> Config.Convert.Rules[r].SecRem) then
-                            Begin
-                              DoChanges := True;
-                              WriteLog('Indsætter sec remark: ' + Pro_SecRem[j] + '->' + Config.Convert.Rules[r].SecRem);
-                              Pro_SecRem[j] := Config.Convert.Rules[r].SecRem;
-                            End;
-
-                            {If Not Config.Convert.Rules[r].SetOnlyPagecount then
-                            Begin
-                              If Config.Convert.Rules[r].ForceCommon then
-                              Begin
-                                If Pro_SecUnique[j] <> '' then DoChanges := True;
-                                WriteLog('Set Unique empty.');
-                                Pro_SecUnique[j] := '';
-                              End Else
-                              Begin
-                                If Pro_SecUnique[j] <> DocUniquePage[s] then DoChanges := True;
-                                WriteLog('Set Unique: ' + Pro_SecUnique[j] + '->' + DocUniquePage[s]);
-                                Pro_SecUnique[j]   := DocUniquePage[s];
-                              End;
-
-                              If Config.Convert.Rules[r].ForceUnique then
-                              Begin
-                                WriteLog('Set Force unique on all pages.');
-                                SL := TStringlist.Create;
-                                For x := 1 to Pro[p].NoOfPages do
-                                  SL.Add(Pro_SecUnique[j]);
-
-                                If Pro_SecUnique[j] <> SL.CommaText then
-                                  DoChanges := True;
-                                Pro_SecUnique[j] := SL.CommaText;
-                                SL.Free;
-                              End;
-                            End;}
-
-                            {For x := 0 to Pro_PageCount.Count - 1 do
-                            Begin
-                              For y := x to Pro_PageCount.Count - 1 do
-                              Begin
-                                If Pro_SecName[x] > Pro_SecName[y] then
-                                Begin
-                                  TmpS := Pro_PageCount[x];
-                                  Pro_PageCount[x] := Pro_PageCount[y];
-                                  Pro_PageCount[y] := TmpS;
-
-                                  TmpS := Pro_SecName[x];
-                                  Pro_SecName[x] := Pro_SecName[y];
-                                  Pro_SecName[y] := TmpS;
-
-                                  TmpS := Pro_SecRem[x];
-                                  Pro_SecRem[x] := Pro_SecRem[y];
-                                  Pro_SecRem[y] := TmpS;
-
-                                  TmpS := Pro_SecUnique[x];
-                                  Pro_SecUnique[x] := Pro_SecUnique[y];
-                                  Pro_SecUnique[y] := TmpS;
-
-                                end;
-                              End;
-                            end;//Så er de sorteret}
-
-                            //Tæller alle sider sammen
-                            Total := 0;
-                            For t := 0 to Pro_PageCount.Count - 1 do
-                              Inc(Total, StrToIntDef(Pro_PageCount[t], 0));
-
-                            If DoChanges then
-                            Begin
-                              Que2.Close;
-                              Que2.SQL.Text := 'UPDATE DATA SET';
-                              Que2.SQL.Add('  Pro_PageCount ='''  + Pro_PageCount.CommaText + '''');
-                              Que2.SQL.Add(' ,SIDE_ANTAL    ='''  + IntToStr(Total)         + '''');
-                              Que2.SQL.Add(' ,Pro_SecName   ='''  + Pro_SecName.CommaText   + '''');
-                              Que2.SQL.Add(' ,DummyStatus   = 1');
-                              Que2.SQL.Add(' ,Pro_Editions_Unique ='''  +  Pro_SecUnique.DelimitedText  + '''');
-                              //If (NOT Config.RulesProConv[r].SetOnlyPageCount) or (Config.RulesProConv[r].UseForceCommon) then
-                              Que2.SQL.Add(' ,Pro_SecRem    ='''  + Pro_SecRem.CommaText    + '''');
-                              Que2.SQL.Add(' WHERE ID = ''' + IntToStr(PPMID) + '''');
-                              //Que2.SQL.SaveToFile('300.sql');
-                              If not tbSimulate.Down then
-                                Que2.ExecSQL;
-
-                              EventLog.Debug('End updating ' + Pro[p].PubName);
-
-                              If ReadyToSendtToCC(PPMID, false) then
-                              Begin
-                                Que2.Close;
-                                Que2.SQL.Text := 'UPDATE DATA SET';
-                                Que2.SQL.Add(' SEND_TO_CC = 1');
-                                Que2.SQL.Add(' WHERE ID = ''' + IntToStr(PPMID) + '''');
-                                If not tbSimulate.Down then
-                                  Que2.ExecSQL;
-                              End;
+                      // ### NAN 2024-08-21 - inkluder variant med trim/ikke trim i bestemmelse af endeligt produkt
+                      (
+                           ((Config.Convert.Rules[r].PageType = 'T') and (Pro[p].Trim))
+                        or ((Config.Convert.Rules[r].PageType = 'E') and (not Pro[p].Trim))
+                        or (Config.Convert.Rules[r].PageType = '')  // Ikke i spil...
+                        ) then
+                    Begin
+                      If (Uppercase(Pro[p].Section) = Uppercase(Config.Convert.Rules[r].fSec)) or (Config.Convert.Rules[r].fSec = '') then
+                      Begin //Den skal rules
+                        WriteLog('Regel fundet: ' + Config.Convert.Rules[r].fName);
+                        Pro[p].PubName := Config.Convert.Rules[r].tName[0];
+                        If (Length(Config.Convert.Rules[r].tZone) > 0) and (Config.Convert.Rules[r].tZone[0] <> '') then
+                          Pro[p].Zone := Config.Convert.Rules[r].tZone[0];
+                        If (Length(Config.Convert.Rules[r].tSec) > 0) and (Config.Convert.Rules[r].tSec[0] <> '') then
+                          Pro[p].Section := Config.Convert.Rules[r].tSec[0];
 
 
-                            end Else
-                              WriteLog('Ingen ændringer. Alt passer.');
-                          end;
+                        // ### NAN 2024-08-21 - hvis vendesektion - brug masternavn som pubname (hvis TurnSectionMaster er blank burde konfig'ens pubnavn faktisk være ok)
 
-                          Pro_PageCount.Free;
-                          Pro_SecName.Free;
-                          Pro_SecRem.Free;
-                          Pro_SecUnique.Free;
-                          Que1.Next;
+                        if (Config.Convert.Rules[r].IsTurnSection) and (Config.Convert.Rules[r].TurnSectionMaster <> '') then
+                        begin
+                          WriteLog('Vendesektion: Brug endeligt produktnavn ' + Config.Convert.Rules[r].TurnSectionMaster);
+                          Pro[p].PubName := Config.Convert.Rules[r].TurnSectionMaster;
 
-                        If not tbSimulate.Down then
-                          SQLTrans.commit else
-                          WriteLog('Simulate');
+                          // ### HACK Fang ulovlig sektion for vendesektion...(må ikke være A)
+                          if (Pro[p].Section = 'A') then
+                            Pro[p].Section := Config.Convert.DefaultTurnSectionName;
                         end;
 
-                        End else                        //Det er en flyvende rule
+
+                        If not Config.Convert.Rules[r].Flying then
                         Begin
-                          Que2.Close;
-                          Que2.SQL.Text := 'Select ID, Long_Name, Long_Name_Add, Udg_Dato, ProType, Zones, Pro_PageCount, Pro_SecName, Pro_SecRem, Pro_Editions_Unique from DATA with (NOLOCK)';
-                          Que2.SQL.Add(   'Where CAST(UDG_DATO AS Date) = ''' + FormatDatetime('YYYY-MM-DD', PubDate) + '''');
-                          Que2.SQL.Add(   'And Upper(Pro_SecRem) like ''%#' + Uppercase(Pro[p].PubName) + '%''');
-                          //Que2.SQL.SaveToFile('1100.sql');
-                          Que2.Open;
+                          Que1.Close;
+                          // ### NAN 2024-08-21 inkluder felt Pro_SecSpec
+                          Que1.SQL.Text := 'Select ID, Long_Name, Long_Name_Add, Short_Name, Udg_Dato, Pro_PageCount, Pro_SecName, Pro_SecRem, Zones, Pro_Editions_Unique,Pro_SecSpec,cast(Lock as int) as lock from DATA';
+                          // ###
+                          Que1.SQL.Add(   'Where CAST(UDG_DATO AS Date) = ''' + FormatDatetime('YYYY-MM-DD', Pro[p].PubDate) + '''');
+                          Que1.SQL.Add(   'And Short_Name = ''' + Pro[p].PubName + '''');
+                          Que1.SQL.Add(   'And Zones = ''' + IntToStr(ZoneToID(Pro[p].Zone)) + '''');
+                          Que1.Open;
 
-                          If Que2.RecordCount > 0 then
-                            WriteLog(Uppercase(Pro[p].PubName) + ' fundet i ' + Que2.FieldByName('Long_Name').AsString);
-
-                          While not Que2.EOF do
+                          If (Que1.RecordCount > 0) then
                           Begin
-                            DoChanges := False;
-                            PPMID := Que2.FieldByName('ID').AsInteger;
-
-                            SLPageName := TStringList.Create;
-                            SLPageName.Delimiter     := ',';
-                            SLPageName.DelimitedText := Que2.FieldByName('Pro_PageCount').AsString;
-                            SLSecName := TStringList.Create;
-                            SLSecName.Delimiter     := ',';
-                            SLSecName.DelimitedText := Que2.FieldByName('Pro_SecName').AsString;
-                            SLUnqName := TStringList.Create;
-                            SLUnqName.Delimiter     := ';';
-                            SLUnqName.StrictDelimiter := True;
-                            SLUnqName.DelimitedText := Que2.FieldByName('Pro_Editions_Unique').AsString;
-                            SLSecRem := TStringList.Create;
-                            SLSecRem.Delimiter     := ',';
-                            SLSecRem.DelimitedText := Que2.FieldByName('Pro_SecRem').AsString;
-
-                            While SLUnqName.Count < SLPageName.Count do
-                              SLUnqName.Add('');
-                            While SLSecRem.Count < SLPageName.Count do
-                              SLSecRem.Add('');
-
-                            For x := 0 to SLSecName.Count - 1 do
+                            WriteLog('Produktion allerede i PPM: ' + Pro[p].PubName + ', ' + FormatDatetime('dd.mm YYYY', Pro[p].PubDate));
+                          End else
+                          Begin
+                            If Config.Convert.Rules[r].CreateMissing then
                             Begin
-                              Tmps := SLSecRem[x];
-                              If Pos('#' + Uppercase(Pro[p].PubName), Uppercase(SLSecRem[x])) = 1 then
+                              PPMID := CreateNewPro(Pro[p].PubDate, 0, Pro[p].PubName);
+                              Que1.Close;
+                              // ### NAN 2024-08-21 inkluder felt Pro_SecSpec
+                              Que1.SQL.Text := 'Select ID, Long_Name, Long_Name_Add, Short_Name, Udg_Dato, Pro_PageCount, Pro_SecName, Pro_SecRem, Zones, Pro_Editions_Unique,Pro_SecSpec from DATA';
+                              // ###
+                              Que1.SQL.Add(   'Where ID = ''' + IntToStr(PPMID) + '''');
+                              //Que1.SQL.SaveToFile('302.sql');
+                              Que1.Open;
+                              WriteLog('Ny produktion oprettet: ' + Pro[p].PubName + ', ' + FormatDatetime('dd.mm YYYY', Pro[p].PubDate) + ' fra regl: ' + Config.Convert.Rules[r].fName);
+                              NewProduct := true;
+                            End else
+                            Begin
+                              PPMID:= -1;
+                              WriteLog('Produktion ikke fundet og oprettes ikke: ' + Pro[p].PubName + ', ' + FormatDatetime('dd.mm YYYY', Pro[p].PubDate) + ' fra regl: ' + Config.Convert.Rules[r].fName);
+                            End;
+                          End;
+        ;
+                          While not Que1.EOF do
+                          Begin //Den findes, opdater med sidetal mv.
+                            DoChanges := False;
+
+                            locked := false;
+                            if (Que1.FieldByName('lock').AsInteger <> 0) then
+                               locked := true;
+
+                            PPMID := Que1.FieldByName('ID').AsInteger;
+                            Pro_PageCount := TStringList.Create;
+                            Pro_PageCount.Delimiter := ',';
+                            Pro_SecName := TStringList.Create;
+                            Pro_SecName.Delimiter := ',';
+                            Pro_SecRem := TStringList.Create;
+                            Pro_SecRem.Delimiter := ',';
+                            Pro_SecUnique := TStringList.Create;
+                            Pro_SecUnique.Delimiter := ';';          //OBS OBS ";"
+                            Pro_SecUnique.StrictDelimiter := True;
+
+                            // ### NAN 2024-08-21 - ny til at holde vendesektions-info
+                            Pro_SecSpec := TStringList.Create;
+                            Pro_SecSpec.Delimiter := ';';          //OBS OBS ";"
+                            Pro_SecSpec.StrictDelimiter := True;
+                            // ###
+
+                            Pro_PageCount.DelimitedText := Que1.FieldByName('Pro_PageCount').AsString;
+                            Pro_SecName.DelimitedText   := Que1.FieldByName('Pro_SecName').AsString;
+                            Pro_SecRem.DelimitedText    := Que1.FieldByName('Pro_SecRem').AsString;
+                            Pro_SecUnique.DelimitedText := Que1.FieldByName('Pro_Editions_Unique').AsString;
+                            Pro_SecSpec.DelimitedText := Que1.FieldByName('Pro_SecSpec').AsString;
+
+                            TmpS := Que1.FieldByName('Pro_Editions_Unique').AsString;
+
+                            // Først skal der evt rettes op i længde
+                            EventLog.Debug('Found ' + Que1.FieldByName('Short_Name').AsString  + ' in PPMID:' + IntToStr(PPMID));
+                            EventLog.Debug('Checking length before. Pro_PageCount=' + Pro_PageCount.CommaText +
+                                                             ' Pro_SecName=' + Pro_SecName.CommaText +
+                                                             ' Pro_SecRem=' + Pro_SecRem.CommaText +
+                                                             ' Pro_SecUnique=' + Pro_SecUnique.CommaText
+                                                             );
+
+                            t := Pro_PageCount.Count;
+                            While Pro_SecName.Count < t do
+                              Pro_SecName.Add('');
+
+                            While Pro_SecRem.Count < t do
+                              Pro_SecRem.Add('');
+
+                            While Pro_SecUnique.Count < t do
+                              Pro_SecUnique.Add('');
+
+
+                            While Pro_SecName.Count > t do
+                              Pro_SecName.Delete(Pro_SecName.Count - 1);
+
+                            While Pro_SecUnique.Count > t do
+                              Pro_SecUnique.Delete(Pro_SecUnique.Count - 1);
+
+                            While Pro_SecRem.Count > t do
+                              Pro_SecRem.Delete(Pro_SecRem.Count - 1);
+
+                            // ### NAN 2024-08-21 Align list længde
+                             While Pro_SecSpec.Count < t do
+                              Pro_SecSpec.Add('');
+                            While Pro_SecSpec.Count > t do
+                              Pro_SecSpec.Delete(Pro_SecSpec.Count - 1);
+                            // ###
+
+                            EventLog.Debug('Checking length after. Pro_PageCount=' + Pro_PageCount.CommaText +
+                                                           ' Pro_SecName=' + Pro_SecName.CommaText +
+                                                           ' Pro_SecRem=' + Pro_SecRem.CommaText +
+                                                           ' Pro_SecUnique=' + Pro_SecUnique.CommaText +
+                                                           ' Pro_SecSpec=' + Pro_SecSpec.CommaText
+                                                           );
+                            j := Pro_SecName.IndexOf(Pro[p].Section);
+                            If j < 0 then
+                            Begin         //Sec er der ikke. opret.
+                              If (Pro_SecName.Count = 1) and (Pro_SecName[0] = '') then
                               Begin
-                                TmpZone := IdToZone(Que2.FieldByName('Zones').AsInteger);  //Som udgangspunkt tages produktets zone
-                                If (Pos(':Z', Uppercase(SLSecRem[x])) > 0) Then
-                                  TmpZone := Copy(SLSecRem[x], Pos(':Z', SLSecRem[x]) + 2, 1); //Okay den er ændret
+                                Pro_SecName[0] := Pro[p].Section;
+                              end else
+                              Begin
+                                Pro_PageCount.Add('0');
+                                Pro_SecName.Add(Pro[p].Section);
+                                Pro_SecRem.Add('');
+                                Pro_SecUnique.Add('');
+                                // ### NAN 2024-08-21 - default
+                                Pro_SecSpec.Add('');       //Pro_SecSpec.Add('0,0,0,0,0,-1,-1,-1,0');
+                              end;
+                              j := Pro_SecName.IndexOf(Pro[p].Section);
+                              DoChanges := True;
+                              WriteLog('Sektion ' + Pro_SecName[j] + ' mangler i produkt. Oprettet.');
+                            End;
 
-                                If (TmpZone = Pro[p].Zone) then
+                            // ### NAN 2024-08-21 - håndter master til vendesektion - der SKAL være en sektion 2
+                            if (Config.Convert.Rules[r].IsTurnSectionMaster) then
+                            begin
+                                If (Pro_SecName.Count = 1) then
+                                begin
+                                   Pro_SecName.Add(Config.Convert.DefaultTurnSectionName);
+                                   Pro_PageCount.Add('0');
+                                   Pro_SecRem.Add('');
+                                   Pro_SecUnique.Add('');
+                                   Pro_SecSpec.Add('');
+                                end;
+
+                            end;
+
+                            If j >= 0 then //Og det skal den for pokker være
+                            Begin
+                              WriteLog('Sektion: [' + Pro_SecName[j] + '] fundet i ID:' + Que1.FieldByName('ID').AsString + ' ' + Que1.FieldByName('Long_Name').AsString + ' ' + Que1.FieldByName('Long_Name_Add').AsString + ' Zone ' + IdToZone(Que1.FieldByName('Zones').AsInteger) + ' Section ' + Pro_SecName[j]);
+
+                              If (Not Config.Convert.Rules[r].SetOnlyUnique) and (Pro_PageCount[j] <> IntToStr(Pro[p].NoOfPages)) then
+                              Begin
+                                DoChanges := True;
+                                WriteLog('Ændrer sidetal på sektion: ' + Pro_SecName[j] + ' ' + Pro_PageCount[j] + '->' + IntToStr(Pro[p].NoOfPages));
+                                If (Config.Convert.Rules[r].AppendCopyCount) then
                                 Begin
-                                  TmpSec := SLSecName[x];
-                                  If (Pos(':S', Uppercase(SLSecRem[x])) > 0) then
-                                    TmpSec := Copy(SLSecRem[x], Pos(':S', SLSecRem[x]) + 2, 1);
+                                  Pro_PageCount[j] := IntToStr(StrToIntDef(Pro_PageCount[j], 0) + Pro[p].NoOfPages);
+                                End else
+                                  Pro_PageCount[j] := IntToStr(Pro[p].NoOfPages);
+                              End;
 
-                                  //idxSec := DocSecName.IndexOf(TmpSec);
+                              If Pro_PageCount[j] = '' Then
+                                Pro_PageCount[j] := '0';
 
-                                  If (Pro[p].Section = TmpSec) then                            //Vi har den
-                                  Begin
-                                    WriteLog('Found inserted section: ID=' + Que2.FieldByName('ID').AsString + ' ' + Que2.FieldByName('Long_Name').AsString + ' ' + Que2.FieldByName('Long_Name_Add').AsString + ' Zone=' + IdToZone(Que2.FieldByName('Zones').AsInteger) + ' Section=' + SLSecName[x] );
-                                    If SLPageName[x] <> IntToSTr(Pro[p].NoOfPages) then
-                                      DoChanges := True;
-                                    SLPageName[x] := IntToSTr(Pro[p].NoOfPages);
+                              If (Config.Convert.Rules[r].SecRem <> '') and (Pro_SecRem[j] <> Config.Convert.Rules[r].SecRem) then
+                              Begin
+                                DoChanges := True;
+                                WriteLog('Indsætter sec remark: ' + Pro_SecRem[j] + '->' + Config.Convert.Rules[r].SecRem);
+                                Pro_SecRem[j] := Config.Convert.Rules[r].SecRem;
+                              End;
 
-                                    t := 0; //Total antal sider
-                                    For y := 0 to SLPageName.Count - 1 do
-                                      Inc(t, StrToIntDef(SLPageName[y], 0));
+                              // ### NAN 2024-08-21 - håndter vendesektion
+                              if (Config.Convert.Rules[r].IsTurnSection) then
+                              begin
+                                 DoChanges := True;
+                                 Pro_SecSpec[j] := '0,0,0,0,0,-1,-1,-1,1'; // ### Sidste 1 angiver at dette er en vendesektion
+                              end;
 
-                                    {If SLUnqName[x] <> DocUniquePage[s] then
-                                      DoChanges := True;
-                                    SLUnqName[x] := DocUniquePage[s];}
 
-                                    If DoChanges then
-                                    Begin
-                                      Que1.Close;
-                                      Que1.SQL.Text := 'UPDATE DATA SET';
-                                      Que1.SQL.Add('  SIDE_ANTAL = '''          + IntToSTr(t) + '''');
-                                      Que1.SQL.Add(' ,DummyStatus = 1');
-                                      Que1.SQL.Add(' ,Pro_PageCount = '''       + SLPageName.CommaText + '''');
-                                      Que1.SQL.Add(' ,Pro_Editions_Unique = ''' + SLUnqName.DelimitedText + '''');
-
-                                      Que1.SQL.Add(' Where ID = '''             + IntToStr(PPMID) + '''');
-                                      If not tbSimulate.Down then
-                                        Que1.ExecSQL else
-                                        WriteLog('SIMULATE update');
-
-                                      WriteLog('Pagecount=' + IntToSTr(t) + ' Pages=' + SLPageName.CommaText + ' Unique=' + SLUnqName.DelimitedText);
-
-                                      If ReadyToSendtToCC(PPMID, false) then
-                                      Begin
-                                        Que1.Close;
-                                        Que1.SQL.Text := 'UPDATE DATA SET';
-                                        Que1.SQL.Add(' SEND_TO_CC = 1');
-                                        Que1.SQL.Add(' Where ID = '''             + IntToStr(PPMID) + '''');
-                                        If not tbSimulate.Down then
-                                          Que1.ExecSQL else
-                                      End;
-
-                                    end else
-                                      WriteLog('Nothing to changes. All match.');
+                              // ### NAN 2024-08-21 - hvis SecSpec er sat på sektion - skal alle sektioner sættes.
+                              ProSecSpecUsed := false;
+                              For t := 0 to Pro_SecSpec.Count - 1 do
+                              begin
+                                if (Pro_SecSpec[t] <> '') then
+                                  ProSecSpecUsed := true;
+                              end;
+                              if ProSecSpecUsed then
+                              begin
+                                For t := 0 to Pro_SecSpec.Count - 1 do
+                                begin
+                                  if (Pro_SecSpec[t] = '') then
+                                  begin
+                                    Pro_SecSpec[t] := '0,0,0,0,0,-1,-1,-1,0';
                                   end;
                                 end;
                               end;
+
+                              //Tæller alle sider sammen
+                              Total := 0;
+                              For t := 0 to Pro_PageCount.Count - 1 do
+                                Inc(Total, StrToIntDef(Pro_PageCount[t], 0));
+
+                              if (locked) then
+                                WriteLog('Produktion er låst - ingen ændringer gemmes');
+
+                              If (DoChanges) and (locked = false) then
+                              Begin
+                                Que2.Close;
+                                Que2.SQL.Text := 'UPDATE DATA SET';
+                                Que2.SQL.Add('  Pro_PageCount ='''  + Pro_PageCount.CommaText + '''');
+                                Que2.SQL.Add(' ,SIDE_ANTAL    ='''  + IntToStr(Total)         + '''');
+                                Que2.SQL.Add(' ,Pro_SecName   ='''  + Pro_SecName.CommaText   + '''');
+                                Que2.SQL.Add(' ,DummyStatus   = 1');
+                                Que2.SQL.Add(' ,Pro_Editions_Unique ='''  +  Pro_SecUnique.DelimitedText  + '''');
+
+                                // ### NAN 2028-08-21 - sæt SecSpec med evt vendesektion-info
+                                if (ProSecSpecUsed) then
+                                  Que2.SQL.Add(' ,Pro_SecSpec =' + QuotedStr(Pro_SecSpec.DelimitedText))
+                                else
+                                  Que2.SQL.Add(' ,Pro_SecSpec ='''' ');
+
+                                //If (NOT Config.RulesProConv[r].SetOnlyPageCount) or (Config.RulesProConv[r].UseForceCommon) then
+                                Que2.SQL.Add(' ,Pro_SecRem    ='''  + Pro_SecRem.CommaText    + '''');
+                                Que2.SQL.Add(' WHERE ID = ''' + IntToStr(PPMID) + '''');
+                                //Que2.SQL.SaveToFile('300.sql');
+                                If not tbSimulate.Down then
+                                  Que2.ExecSQL;
+
+                                EventLog.Debug('End updating ' + Pro[p].PubName);
+
+
+                                // ### NAN 2024-08-21 - håndter trim. Hvis filnavn angiver trim, skal 'TrimToTrimbox' sættes og der skal sættes en ripskalering
+                                // Normalt vil dette blive sat i CreatePro() baseret på produktnavn - men man ved aldrig..
+                                // Sæt kun hvis produkt er nyoprettet
+                                if ( Pro[p].Trim) and (NewProduct) then
+                                begin
+                                  RipScalingID := RipSetupToID(Config.Convert.DefaultTrimRipSetup);
+
+                                  Que2.Close;
+                                  Que2.SQL.Text := 'UPDATE DATA SET UseTrimBox=-1';
+                                  Que2.SQL.Add(',Crimp=' + IntToStr(RipScalingID));
+                                  Que2.SQL.Add(',SKAR_BREDE=' + IntToStr(Config.COnvert.DefaultTrimFormatW));
+                                  Que2.SQL.Add(',SKAR_HOJDE=' + IntToStr(Config.COnvert.DefaultTrimFormatH));
+                                  Que2.SQL.Add(' WHERE ID = '+ IntToStr(PPMID) + ' AND UseTrimBox=0');
+                                  If not tbSimulate.Down then
+                                    Que2.ExecSQL;
+                                  Que2.Close;
+                                end;
+
+
+                                // 2024-07-05 - fix hovedprodukt hvis dette er et weekendtillæg der ved en fejl er lagt ind som B-sektion i hovedprodukt
+                                //              Store proc fjerner B-sektion fra hovedproduktet hvis den også er oprettet selvstændigt
+
+                                try
+                                   Que2.Close;
+                                   Que2.SQL.Text := 'EXEC spPostCreate ' + IntToStr(PPMID);
+                                   Que2.ExecSQL;
+                                   fMain.EventLog.Debug('Called spPostCreate( ' + IntToStr(PPMID) + ')');
+                                except
+                                  on E: Exception do
+                                  begin
+                                     fMain.EventLog.Debug('exec spPostCreate error: ' + E.Message);
+                                   end;
+                                end;
+
+                                If ReadyToSendtToCC(PPMID, false) then
+                                Begin
+                                  Que2.Close;
+                                  Que2.SQL.Text := 'UPDATE DATA SET';
+                                  Que2.SQL.Add(' SEND_TO_CC = 1');
+                                  Que2.SQL.Add(' WHERE ID = ''' + IntToStr(PPMID) + '''');
+                                  If not tbSimulate.Down then
+                                    Que2.ExecSQL;
+                                End;
+
+
+                              end Else
+                                WriteLog('Ingen ændringer. Alt passer.');
                             end;
 
-                            SLPageName.Free;
-                            SLSecName.Free;
-                            SLUnqName.Free;
-                            SLSecRem.Free;
-                            Que2.Next;
+                            Pro_PageCount.Free;
+                            Pro_SecName.Free;
+                            Pro_SecRem.Free;
+                            Pro_SecUnique.Free;
+                            Pro_SecSpec.Free; // ###
+                            Que1.Next;
+
+                            If not tbSimulate.Down then
+                              SQLTrans.commit
+                            else
+                              WriteLog('Simulate');
+                            end;
+
+                          End else                        //Det er en flyvende rule
+                          Begin
+                            Que2.Close;
+                            Que2.SQL.Text := 'Select ID, Long_Name, Long_Name_Add, Udg_Dato, ProType, Zones, Pro_PageCount, Pro_SecName, Pro_SecRem, Pro_Editions_Unique from DATA with (NOLOCK)';
+                            Que2.SQL.Add(   'Where CAST(UDG_DATO AS Date) = ''' + FormatDatetime('YYYY-MM-DD', PubDate) + '''');
+                            Que2.SQL.Add(   'And Upper(Pro_SecRem) like ''%#' + Uppercase(Pro[p].PubName) + '%''');
+                            //Que2.SQL.SaveToFile('1100.sql');
+                            Que2.Open;
+
+                            If Que2.RecordCount > 0 then
+                              WriteLog(Uppercase(Pro[p].PubName) + ' fundet i ' + Que2.FieldByName('Long_Name').AsString);
+
+                            While not Que2.EOF do
+                            Begin
+                              DoChanges := False;
+                              PPMID := Que2.FieldByName('ID').AsInteger;
+
+                              SLPageName := TStringList.Create;
+                              SLPageName.Delimiter     := ',';
+                              SLPageName.DelimitedText := Que2.FieldByName('Pro_PageCount').AsString;
+                              SLSecName := TStringList.Create;
+                              SLSecName.Delimiter     := ',';
+                              SLSecName.DelimitedText := Que2.FieldByName('Pro_SecName').AsString;
+                              SLUnqName := TStringList.Create;
+                              SLUnqName.Delimiter     := ';';
+                              SLUnqName.StrictDelimiter := True;
+                              SLUnqName.DelimitedText := Que2.FieldByName('Pro_Editions_Unique').AsString;
+                              SLSecRem := TStringList.Create;
+                              SLSecRem.Delimiter     := ',';
+                              SLSecRem.DelimitedText := Que2.FieldByName('Pro_SecRem').AsString;
+
+                              While SLUnqName.Count < SLPageName.Count do
+                                SLUnqName.Add('');
+                              While SLSecRem.Count < SLPageName.Count do
+                                SLSecRem.Add('');
+
+                              For x := 0 to SLSecName.Count - 1 do
+                              Begin
+                                Tmps := SLSecRem[x];
+                                If Pos('#' + Uppercase(Pro[p].PubName), Uppercase(SLSecRem[x])) = 1 then
+                                Begin
+                                  TmpZone := IdToZone(Que2.FieldByName('Zones').AsInteger);  //Som udgangspunkt tages produktets zone
+                                  If (Pos(':Z', Uppercase(SLSecRem[x])) > 0) Then
+                                    TmpZone := Copy(SLSecRem[x], Pos(':Z', SLSecRem[x]) + 2, 1); //Okay den er ændret
+
+                                  If (TmpZone = Pro[p].Zone) then
+                                  Begin
+                                    TmpSec := SLSecName[x];
+                                    If (Pos(':S', Uppercase(SLSecRem[x])) > 0) then
+                                      TmpSec := Copy(SLSecRem[x], Pos(':S', SLSecRem[x]) + 2, 1);
+
+                                    //idxSec := DocSecName.IndexOf(TmpSec);
+
+                                    If (Pro[p].Section = TmpSec) then                            //Vi har den
+                                    Begin
+                                      WriteLog('Found inserted section: ID=' + Que2.FieldByName('ID').AsString + ' ' + Que2.FieldByName('Long_Name').AsString + ' ' + Que2.FieldByName('Long_Name_Add').AsString + ' Zone=' + IdToZone(Que2.FieldByName('Zones').AsInteger) + ' Section=' + SLSecName[x] );
+                                      If SLPageName[x] <> IntToSTr(Pro[p].NoOfPages) then
+                                        DoChanges := True;
+                                      SLPageName[x] := IntToSTr(Pro[p].NoOfPages);
+
+                                      t := 0; //Total antal sider
+                                      For y := 0 to SLPageName.Count - 1 do
+                                        Inc(t, StrToIntDef(SLPageName[y], 0));
+
+                                      {If SLUnqName[x] <> DocUniquePage[s] then
+                                        DoChanges := True;
+                                      SLUnqName[x] := DocUniquePage[s];}
+
+                                      If DoChanges then
+                                      Begin
+                                        Que1.Close;
+                                        Que1.SQL.Text := 'UPDATE DATA SET';
+                                        Que1.SQL.Add('  SIDE_ANTAL = '''          + IntToSTr(t) + '''');
+                                        Que1.SQL.Add(' ,DummyStatus = 1');
+                                        Que1.SQL.Add(' ,Pro_PageCount = '''       + SLPageName.CommaText + '''');
+                                        Que1.SQL.Add(' ,Pro_Editions_Unique = ''' + SLUnqName.DelimitedText + '''');
+
+                                        Que1.SQL.Add(' Where ID = '''             + IntToStr(PPMID) + '''');
+                                        If not tbSimulate.Down then
+                                          Que1.ExecSQL else
+                                          WriteLog('SIMULATE update');
+
+                                        WriteLog('Pagecount=' + IntToSTr(t) + ' Pages=' + SLPageName.CommaText + ' Unique=' + SLUnqName.DelimitedText);
+
+                                        If ReadyToSendtToCC(PPMID, false) then
+                                        Begin
+                                          Que1.Close;
+                                          Que1.SQL.Text := 'UPDATE DATA SET';
+                                          Que1.SQL.Add(' SEND_TO_CC = 1');
+                                          Que1.SQL.Add(' Where ID = '''             + IntToStr(PPMID) + '''');
+                                          If not tbSimulate.Down then
+                                            Que1.ExecSQL else
+                                        End;
+
+                                      end else
+                                        WriteLog('Nothing to changes. All match.');
+                                    end;
+                                  end;
+                                end;
+                              end;
+
+                              SLPageName.Free;
+                              SLSecName.Free;
+                              SLUnqName.Free;
+                              SLSecRem.Free;
+
+                              Que2.Next;
+                            end;
                           end;
                         end;
-                      end;
 
-                    If not tbSimulate.Down then
-                      SQLTrans.commit;
+                      If not tbSimulate.Down then
+                        SQLTrans.commit;
+                    end;
                   end;
                 end; //End of rules
+                WriteLog('---- Seached all rules ----');
               End; //Hvis den ikke er tom
             End; //All product finish
-
+            WriteLog('Done.');
             NewF := ExtractFileName(MyFiles[i]);
             NewE := ExtractFileExt(MyFiles[i]);
             NewF := Copy(NewF, 1, Pos('.', NewF) - 1);
@@ -1040,8 +1180,14 @@ procedure TfMain.Timer1Timer(Sender: TObject);
 begin
   Timer1.Enabled := False;
   tbStatus.ImageIndex := 9;
+  StatusBar.Panels.Items[0].Text := 'Skanner input..';
+  Application.ProcessMessages;
+
   DoImport;
+
   tbStatus.ImageIndex := 7;
+  StatusBar.Panels.Items[0].Text := '';
+  Application.ProcessMessages;
   Timer1.Enabled := True;
 end;
 
@@ -1050,10 +1196,7 @@ begin
   Application.Terminate;
 end;
 
-procedure TfMain.ToolButton2Click(Sender: TObject);
-begin
 
-end;
 
 
 procedure TfMain.ToolButton3Click(Sender: TObject);
@@ -1203,16 +1346,33 @@ begin
   end;
 
   Config.System.DonePath := INI.ReadString('Path', 'Done', '');
-  WriteLog('Done path: ' + Config.System.DonePath);
+  if (Config.System.DonePath = '') then
+    WriteLog('Done path IKKE SAT!')
+  else
+    WriteLog('Done path: ' + Config.System.DonePath);
   Config.System.InputPath := INI.ReadString('Path', 'Input', '');
-  WriteLog('Input path: ' + Config.System.InputPath);
+  if (Config.System.InputPath = '') then
+    WriteLog('Input path IKKE SAT!')
+  else
+      WriteLog('Input path: ' + Config.System.InputPath);
   Config.System.OutputPath := INI.ReadString('Path', 'Output', '');
-  WriteLog('Output path: ' + Config.System.OutputPath);
-  Config.System.FileFilter := INI.ReadString('Path', 'Filter', '');
+  { if (Config.System.OutputPath = '') then
+    WriteLog('Output path IKKE SAT!')
+  else
+    WriteLog('Output path: ' + Config.System.OutputPath);    }
+
+  Config.System.FileFilter := INI.ReadString('Path', 'Filter', '*.csv');
   WriteLog('Filefilter: ' + Config.System.FileFilter);
   Config.System.NoMatchPath := INI.ReadString('Path', 'No match', '');
   WriteLog('No match path: ' + Config.System.NoMatchPath);
 
+
+  // ### NAN 2024-08-21 - nye defaults
+  Config.Convert.DefaultTurnSectionName := INI.ReadString('System', 'DefaultTurnSectionName', 'B');
+  Config.Convert.DefaultTrimRipSetup := INI.ReadString('System', 'DefaultTrimRipSetup', '95x98');
+  Config.Convert.DefaultTrimFormatW := INI.ReadInteger( 'System', 'DefaultTrimFormatW', 265);
+  Config.Convert.DefaultTrimFormatH := INI.ReadInteger( 'System', 'DefaultTrimFormatH', 370);
+  // ###
 
   Config.SQLdb.TableName    := INI.ReadString('DB',    'Database', '');
   Config.SQLdb.HostName     := INI.ReadString('DB',    'DB Host',     '');
@@ -1261,7 +1421,7 @@ begin
   Que.PacketRecords:= -1;
 
   Que.Close;
-  Que.SQL.Text := 'Select Top 1 Master_Dok from Config';
+  Que.SQL.Text := 'Select Top 1 Master_Dok from Config';  // ??
   Que.Open;
 
   Que.Close;
@@ -1274,6 +1434,25 @@ begin
     Config.Names.Zone[Que.RecNo -  1].ID   := Que.FieldByName('ID').AsInteger;
     Que.Next;
   end;
+
+  // ### NAN 2024-08-21 - indlæs krympenavne
+  try
+    Que.Close;
+    Que.SQL.Text := 'Select DISTINCT Name,ID FROM CrimpNames';
+    Que.Open;
+    SetLength(Config.Names.RipSetups, Que.RecordCount);
+    while not Que.EOF do
+    begin
+      Config.Names.RipSetups[Que.RecNo -  1].Name := Que.FieldByName('NAME').AsString;
+      Config.Names.RipSetups[Que.RecNo -  1].ID   := Que.FieldByName('ID').AsInteger;
+      Que.Next;
+    end;
+  finally
+   Que.Close;
+  end;
+
+
+
 
   INI.Free;
 
@@ -1314,11 +1493,17 @@ begin
 
     SL.DelimitedText:= INI.ReadString('Rule', slRule[i], '');
 
-    While SL.Count < 24 do
-      SL.Add(''); //Dette blot hvis der ikke er nok col
+    // ### NAN 2024-08-20 3 nye felter  24 -> 27
+//  While SL.Count < 24 do
+    While SL.Count < 28 do
+      SL.Add('');
 
-    If StrToBoolDef(SL[0], False) then
-    Begin
+   // If StrToBoolDef(SL[0], False) then  // Smadrer array'et hvis falsk (uinitialiseret element på plads i)
+   // Begin
+      // ### NAN 2024-099-03 - Sæt overordnet flag istedet
+      Config.Convert.Rules[i].Enabled :=  StrToBoolDef(SL[0], False);
+      // ###
+
       Config.Convert.Rules[i].fName := SL[1];
       Config.Convert.Rules[i].fSec := SL[2];
       Config.Convert.Rules[i].fEdi := SL[3];
@@ -1348,7 +1533,14 @@ begin
       Config.Convert.Rules[i].Flying           := StrToBoolDef(SL[20], False);
       Config.Convert.Rules[i].AppendCopyCount  := StrToBoolDef(SL[21], False);
       Config.Convert.Rules[i].PartCopyCount    := StrToBoolDef(SL[22], False);
-    end;
+
+      // ### NAN 2024-08-20 - nye felter
+      Config.Convert.Rules[i].IsTurnSection    := StrToBoolDef(SL[23], False);
+      Config.Convert.Rules[i].IsTurnSectionMaster := StrToBoolDef(SL[24], False);
+      Config.Convert.Rules[i].TurnSectionMaster := SL[25];
+      Config.Convert.Rules[i].PageType         :=  SL[26];
+
+   // end;
   end;
   slRule.Free;
   SL.Free;
@@ -1368,11 +1560,29 @@ begin
 end;
 
 procedure TfMain.FormCreate(Sender: TObject);
+var
+  FileVerInfo: TFileVersionInfo;
 begin
   Config := TConfig.Create(Nil);
   ReadConfig;
 
   RunningFile := FileCreate(Config.System.AppData + '\Running');
+
+   // ### NAN 20240821- Version i caption..
+  FileVerInfo := TFileVersionInfo.Create(nil);
+  try
+    FileVerInfo.ReadFileInfo;
+    Caption := Caption + ' v' + FileVerInfo.VersionStrings.Values['FileVersion'];
+  finally
+    FileVerInfo.Free;
+  end;
+
+end;
+
+procedure TfMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  if (Config.Convert.Rules <> nil) then
+    SetLength(Config.Convert.Rules, 0);
 end;
 
 procedure TfMain.tbStatusClick(Sender: TObject);

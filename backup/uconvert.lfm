@@ -1,17 +1,17 @@
 object fConvert: TfConvert
-  Left = 543
-  Height = 676
-  Top = 153
+  Left = 758
+  Height = 720
+  Top = 131
   Width = 1089
   Caption = 'fConvert'
-  ClientHeight = 676
+  ClientHeight = 720
   ClientWidth = 1089
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.0.2.0'
+  LCLVersion = '2.2.6.0'
   object PageControl1: TPageControl
     Left = 5
-    Height = 625
+    Height = 669
     Top = 5
     Width = 1079
     ActivePage = TabSheet2
@@ -20,23 +20,23 @@ object fConvert: TfConvert
     TabIndex = 1
     TabOrder = 0
     object TabSheet1: TTabSheet
-      Caption = 'Input convert'
-      ClientHeight = 597
+      Caption = 'Input'
+      ClientHeight = 641
       ClientWidth = 1071
       object GroupBox4: TGroupBox
         Left = 333
-        Height = 587
+        Height = 631
         Top = 5
         Width = 211
         Align = alLeft
         BorderSpacing.Around = 5
-        Caption = 'Zone'
-        ClientHeight = 567
+        Caption = 'Zone-oversættelse'
+        ClientHeight = 611
         ClientWidth = 207
         TabOrder = 0
         object ListView1: TListView
           Left = 0
-          Height = 516
+          Height = 560
           Top = 24
           Width = 207
           Align = alClient
@@ -84,7 +84,7 @@ object fConvert: TfConvert
         object Panel2: TPanel
           Left = 0
           Height = 27
-          Top = 540
+          Top = 584
           Width = 207
           Align = alBottom
           AutoSize = True
@@ -123,18 +123,18 @@ object fConvert: TfConvert
       end
       object GroupBox3: TGroupBox
         Left = 549
-        Height = 587
+        Height = 631
         Top = 5
         Width = 219
         Align = alLeft
         BorderSpacing.Around = 5
-        Caption = 'Edition'
-        ClientHeight = 567
+        Caption = 'Edition-oversættelse'
+        ClientHeight = 611
         ClientWidth = 215
         TabOrder = 1
         object ListView2: TListView
           Left = 0
-          Height = 516
+          Height = 560
           Top = 24
           Width = 215
           Align = alClient
@@ -182,7 +182,7 @@ object fConvert: TfConvert
         object Panel3: TPanel
           Left = 0
           Height = 27
-          Top = 540
+          Top = 584
           Width = 215
           Align = alBottom
           AutoSize = True
@@ -221,18 +221,18 @@ object fConvert: TfConvert
       end
       object GroupBox2: TGroupBox
         Left = 773
-        Height = 587
+        Height = 631
         Top = 5
         Width = 217
         Align = alLeft
         BorderSpacing.Around = 5
-        Caption = 'Section'
-        ClientHeight = 567
+        Caption = 'Sektionsoversættelse'
+        ClientHeight = 611
         ClientWidth = 213
         TabOrder = 2
         object ListView3: TListView
           Left = 0
-          Height = 516
+          Height = 560
           Top = 24
           Width = 213
           Align = alClient
@@ -280,7 +280,7 @@ object fConvert: TfConvert
         object Panel4: TPanel
           Left = 0
           Height = 27
-          Top = 540
+          Top = 584
           Width = 213
           Align = alBottom
           AutoSize = True
@@ -319,13 +319,13 @@ object fConvert: TfConvert
       end
       object GroupBox47: TGroupBox
         Left = 5
-        Height = 587
+        Height = 631
         Top = 5
         Width = 323
         Align = alLeft
         BorderSpacing.Around = 5
         Caption = 'Cross ad'
-        ClientHeight = 567
+        ClientHeight = 611
         ClientWidth = 319
         Constraints.MinWidth = 200
         TabOrder = 3
@@ -408,7 +408,7 @@ object fConvert: TfConvert
           Width = 309
           Align = alTop
           BorderSpacing.Around = 5
-          Caption = 'Send plan to Controlcenter.'
+          Caption = 'Send plan til ControlCenter'
           TabOrder = 2
         end
         object Panel53: TPanel
@@ -482,64 +482,64 @@ object fConvert: TfConvert
       end
     end
     object TabSheet2: TTabSheet
-      Caption = 'PPM rules'
-      ClientHeight = 597
+      Caption = 'PPM-oversættelse'
+      ClientHeight = 641
       ClientWidth = 1071
       object Panel62: TPanel
         Left = 0
-        Height = 597
+        Height = 641
         Top = 0
         Width = 1071
         Align = alClient
         AutoSize = True
         BevelOuter = bvNone
-        ClientHeight = 597
+        ClientHeight = 641
         ClientWidth = 1071
         ParentColor = False
         TabOrder = 0
         object GroupBox66: TGroupBox
           Left = 596
-          Height = 587
+          Height = 631
           Top = 5
           Width = 470
           Align = alClient
           BorderSpacing.Around = 5
-          Caption = 'Changes to'
-          ClientHeight = 567
+          Caption = 'PPM navn'
+          ClientHeight = 611
           ClientWidth = 466
           TabOrder = 0
           object Panel5: TPanel
             Left = 0
-            Height = 567
+            Height = 611
             Top = 0
             Width = 120
             Align = alLeft
             AutoSize = True
             BevelOuter = bvNone
-            ClientHeight = 567
+            ClientHeight = 611
             ClientWidth = 120
             TabOrder = 0
             object ScrollBox1: TScrollBox
               Left = 0
-              Height = 566
+              Height = 610
               Top = 0
               Width = 120
               HorzScrollBar.Page = 1
               HorzScrollBar.Visible = False
               VertScrollBar.Page = 19
               Align = alLeft
-              ClientHeight = 562
+              ClientHeight = 606
               ClientWidth = 116
               TabOrder = 0
               object cgProname: TCheckGroup
                 Left = 0
-                Height = 562
+                Height = 606
                 Top = 0
                 Width = 116
                 Align = alClient
                 AutoFill = True
                 AutoSize = True
-                Caption = 'Product'
+                Caption = 'Produkt'
                 ChildSizing.LeftRightSpacing = 6
                 ChildSizing.TopBottomSpacing = 6
                 ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
@@ -555,7 +555,7 @@ object fConvert: TfConvert
             object Label1: TLabel
               Left = 0
               Height = 1
-              Top = 566
+              Top = 610
               Width = 120
               Align = alBottom
               ParentColor = False
@@ -564,35 +564,35 @@ object fConvert: TfConvert
           end
           object Panel6: TPanel
             Left = 120
-            Height = 567
+            Height = 611
             Top = 0
             Width = 108
             Align = alLeft
             AutoSize = True
             BevelOuter = bvNone
-            ClientHeight = 567
+            ClientHeight = 611
             ClientWidth = 108
             TabOrder = 1
             object ScrollBox2: TScrollBox
               Left = 0
-              Height = 566
+              Height = 610
               Top = 0
               Width = 108
               HorzScrollBar.Page = 104
               VertScrollBar.Page = 19
               Align = alLeft
               AutoSize = True
-              ClientHeight = 562
+              ClientHeight = 606
               ClientWidth = 104
               TabOrder = 0
               object cgSection: TCheckGroup
                 Left = 0
-                Height = 562
+                Height = 606
                 Top = 0
                 Width = 104
                 Align = alLeft
                 AutoFill = True
-                Caption = 'Section'
+                Caption = 'Sektion'
                 ChildSizing.LeftRightSpacing = 6
                 ChildSizing.TopBottomSpacing = 6
                 ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
@@ -609,7 +609,7 @@ object fConvert: TfConvert
             object Label3: TLabel
               Left = 0
               Height = 1
-              Top = 566
+              Top = 610
               Width = 108
               Align = alBottom
               ParentColor = False
@@ -618,39 +618,37 @@ object fConvert: TfConvert
           end
           object Panel7: TPanel
             Left = 344
-            Height = 567
+            Height = 611
             Top = 0
             Width = 111
             Align = alLeft
             AutoSize = True
             BevelOuter = bvNone
-            ClientHeight = 567
+            ClientHeight = 611
             ClientWidth = 111
             TabOrder = 2
             object ScrollBox4: TScrollBox
               Left = 0
-              Height = 566
+              Height = 610
               Top = 0
               Width = 111
-              HorzScrollBar.Page = 49
+              HorzScrollBar.Page = 46
               VertScrollBar.Page = 19
               Align = alLeft
-              ClientHeight = 562
+              ClientHeight = 606
               ClientWidth = 107
               TabOrder = 0
               object cgZone: TCheckGroup
                 Left = 0
-                Height = 562
+                Height = 606
                 Hint = 'Leave unchecked for all zones'
                 Top = 0
                 Width = 107
                 Align = alClient
-                AutoFill = True
-                Caption = 'Zone:'
+                AutoFill = False
+                Caption = 'Zone'
                 ChildSizing.LeftRightSpacing = 6
                 ChildSizing.TopBottomSpacing = 6
-                ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-                ChildSizing.EnlargeVertical = crsHomogenousChildResize
                 ChildSizing.ShrinkHorizontal = crsScaleChilds
                 ChildSizing.ShrinkVertical = crsScaleChilds
                 ChildSizing.Layout = cclLeftToRightThenTopToBottom
@@ -662,7 +660,7 @@ object fConvert: TfConvert
             object Label2: TLabel
               Left = 0
               Height = 1
-              Top = 566
+              Top = 610
               Width = 111
               Align = alBottom
               ParentColor = False
@@ -671,40 +669,38 @@ object fConvert: TfConvert
           end
           object Panel8: TPanel
             Left = 228
-            Height = 567
+            Height = 611
             Top = 0
             Width = 116
             Align = alLeft
             AutoSize = True
             BevelOuter = bvNone
-            ClientHeight = 567
+            ClientHeight = 611
             ClientWidth = 116
             TabOrder = 3
             OnClick = Panel8Click
             object ScrollBox3: TScrollBox
               Left = 0
-              Height = 566
+              Height = 610
               Top = 0
               Width = 116
               HorzScrollBar.Page = 112
               VertScrollBar.Page = 19
               Align = alLeft
               AutoSize = True
-              ClientHeight = 562
+              ClientHeight = 606
               ClientWidth = 112
               TabOrder = 0
               object cgEdition: TCheckGroup
                 Left = 0
-                Height = 562
+                Height = 606
                 Top = 0
                 Width = 112
                 Align = alLeft
-                AutoFill = True
+                AutoFill = False
                 Caption = 'Edition'
                 ChildSizing.LeftRightSpacing = 6
                 ChildSizing.TopBottomSpacing = 6
-                ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-                ChildSizing.EnlargeVertical = crsHomogenousChildResize
                 ChildSizing.ShrinkHorizontal = crsScaleChilds
                 ChildSizing.ShrinkVertical = crsScaleChilds
                 ChildSizing.Layout = cclLeftToRightThenTopToBottom
@@ -716,7 +712,7 @@ object fConvert: TfConvert
             object Label4: TLabel
               Left = 0
               Height = 1
-              Top = 566
+              Top = 610
               Width = 116
               Align = alBottom
               ParentColor = False
@@ -726,24 +722,24 @@ object fConvert: TfConvert
         end
         object Panel58: TPanel
           Left = 276
-          Height = 587
+          Height = 631
           Top = 5
           Width = 315
           Align = alLeft
           BorderSpacing.Around = 5
           BevelOuter = bvNone
-          ClientHeight = 587
+          ClientHeight = 631
           ClientWidth = 315
           TabOrder = 1
           object GroupBox68: TGroupBox
             Left = 0
-            Height = 185
+            Height = 276
             Top = 0
             Width = 315
             Align = alTop
             AutoSize = True
-            Caption = 'Nameing'
-            ClientHeight = 165
+            Caption = 'Navngivning fra dummy'
+            ClientHeight = 256
             ClientWidth = 311
             TabOrder = 0
             object Panel64: TPanel
@@ -764,7 +760,7 @@ object fConvert: TfConvert
                 Width = 160
                 Align = alLeft
                 BorderSpacing.Around = 5
-                Caption = 'Alias'
+                Caption = 'Dummy-navn'
                 Constraints.MinWidth = 160
                 Layout = tlCenter
                 ParentColor = False
@@ -798,7 +794,7 @@ object fConvert: TfConvert
                 Width = 160
                 Align = alLeft
                 BorderSpacing.Around = 5
-                Caption = 'Section: (leave blank if all)'
+                Caption = 'Sektion: (blank = alle)'
                 Constraints.MinWidth = 160
                 Layout = tlCenter
                 ParentColor = False
@@ -807,9 +803,11 @@ object fConvert: TfConvert
                 Left = 170
                 Height = 23
                 Top = 5
-                Width = 136
+                Width = 56
                 Align = alClient
+                BorderSpacing.Right = 80
                 BorderSpacing.Around = 5
+                MaxLength = 1
                 OnChange = eRulesSecChange
                 TabOrder = 0
               end
@@ -832,7 +830,7 @@ object fConvert: TfConvert
                 Width = 160
                 Align = alLeft
                 BorderSpacing.Around = 5
-                Caption = 'Editions: (leave blank if all)'
+                Caption = 'Edition: (blank = alle)'
                 Constraints.MinWidth = 160
                 Layout = tlCenter
                 ParentColor = False
@@ -841,8 +839,9 @@ object fConvert: TfConvert
                 Left = 170
                 Height = 23
                 Top = 5
-                Width = 136
+                Width = 56
                 Align = alClient
+                BorderSpacing.Right = 80
                 BorderSpacing.Around = 5
                 OnChange = eRulesEdiChange
                 TabOrder = 0
@@ -859,6 +858,7 @@ object fConvert: TfConvert
               ClientHeight = 33
               ClientWidth = 311
               TabOrder = 3
+              OnClick = Panel68Click
               object Label158: TLabel
                 Left = 5
                 Height = 23
@@ -866,7 +866,7 @@ object fConvert: TfConvert
                 Width = 160
                 Align = alLeft
                 BorderSpacing.Around = 5
-                Caption = 'Zone: (leave blank if all)'
+                Caption = 'Zone: (blank = alle)'
                 Constraints.MinWidth = 160
                 Layout = tlCenter
                 ParentColor = False
@@ -875,14 +875,71 @@ object fConvert: TfConvert
                 Left = 170
                 Height = 23
                 Top = 5
-                Width = 136
+                Width = 56
                 Align = alClient
+                BorderSpacing.Right = 80
                 BorderSpacing.Around = 5
                 OnChange = eRulesZonChange
                 TabOrder = 0
               end
             end
-            object Panel67: TPanel
+            object chbRuleTurnSection: TCheckBox
+              Left = 5
+              Height = 19
+              Top = 170
+              Width = 301
+              Align = alTop
+              BorderSpacing.Around = 5
+              Caption = 'Produkt er vendesektion (i masterprodukt)'
+              OnChange = chbRuleTurnSectionChange
+              TabOrder = 4
+            end
+            object PanelTurnSection: TPanel
+              Left = 0
+              Height = 33
+              Top = 194
+              Width = 311
+              Align = alTop
+              AutoSize = True
+              BevelOuter = bvNone
+              ClientHeight = 33
+              ClientWidth = 311
+              TabOrder = 5
+              object Label152: TLabel
+                Left = 5
+                Height = 23
+                Top = 5
+                Width = 160
+                Align = alLeft
+                BorderSpacing.Around = 5
+                Caption = 'Masterprod. for vendesektion'
+                Constraints.MinWidth = 160
+                Layout = tlCenter
+                ParentColor = False
+              end
+              object eRuleMasterToTurnSection: TEdit
+                Left = 170
+                Height = 23
+                Top = 5
+                Width = 136
+                Align = alClient
+                BorderSpacing.Around = 5
+                OnChange = eRuleMasterToTurnSectionChange
+                TabOrder = 0
+              end
+            end
+            object ChbRuleMasterToTurnSection: TCheckBox
+              Left = 5
+              Height = 19
+              Top = 232
+              Width = 301
+              Align = alTop
+              BorderSpacing.Around = 5
+              Caption = 'Produkt har vendesektion'
+              OnChange = ChbRuleMasterToTurnSectionChange
+              TabOrder = 6
+            end
+            object PanelPageType: TPanel
               Left = 0
               Height = 33
               Top = 132
@@ -892,7 +949,122 @@ object fConvert: TfConvert
               BevelOuter = bvNone
               ClientHeight = 33
               ClientWidth = 311
+              TabOrder = 7
+              object Label153: TLabel
+                Left = 5
+                Height = 23
+                Top = 5
+                Width = 164
+                Align = alLeft
+                BorderSpacing.Around = 5
+                Caption = 'Sideformat (T=Trim, E=normal)'
+                Constraints.MinWidth = 160
+                Layout = tlCenter
+                ParentColor = False
+              end
+              object eRulePageType: TEdit
+                Left = 174
+                Height = 23
+                Top = 5
+                Width = 52
+                Align = alClient
+                BorderSpacing.Right = 80
+                BorderSpacing.Around = 5
+                MaxLength = 1
+                OnChange = eRulePageTypeChange
+                TabOrder = 0
+              end
+            end
+          end
+          object GroupBox69: TGroupBox
+            Left = 0
+            Height = 207
+            Top = 276
+            Width = 315
+            Align = alTop
+            Caption = 'Oprettelse i PPM'
+            ClientHeight = 187
+            ClientWidth = 311
+            TabOrder = 1
+            OnClick = GroupBox69Click
+            object chbRuleCreate: TCheckBox
+              Left = 5
+              Height = 19
+              Top = 5
+              Width = 301
+              Align = alTop
+              BorderSpacing.Around = 5
+              Caption = 'Opret produkt hvis det ikke eksisterer'
+              OnEditingDone = chbRuleCreateEditingDone
+              TabOrder = 0
+            end
+            object chbRuleSetUnique: TCheckBox
+              Left = 5
+              Height = 19
+              Top = 29
+              Width = 301
+              Align = alTop
+              BorderSpacing.Around = 5
+              Caption = 'Sæt kun unik'
+              OnEditingDone = chbRuleSetUniqueEditingDone
+              TabOrder = 1
+            end
+            object chbRuleSetOnlyPageCount: TCheckBox
+              Left = 5
+              Height = 19
+              Top = 53
+              Width = 301
+              Align = alTop
+              BorderSpacing.Around = 5
+              Caption = 'Sæt kun sidetal'
+              OnEditingDone = chbRuleSetOnlyPageCountEditingDone
+              TabOrder = 2
+            end
+            object chbRuleSearchInSecrem: TCheckBox
+              Left = 5
+              Height = 19
+              Top = 77
+              Width = 301
+              Align = alTop
+              BorderSpacing.Around = 5
+              Caption = 'Søg produktion i section remark'
+              OnChange = chbRuleSearchInSecremChange
+              OnEditingDone = chbRuleSearchInSecremEditingDone
+              TabOrder = 3
+            end
+            object chbRuleAppendPagecount: TCheckBox
+              Left = 5
+              Height = 19
+              Top = 101
+              Width = 301
+              Align = alTop
+              BorderSpacing.Around = 5
+              Caption = 'Append sidetal til  produkt'
+              OnEditingDone = chbRuleAppendPagecountEditingDone
               TabOrder = 4
+            end
+            object chbRulePartPagecount: TCheckBox
+              Left = 5
+              Height = 19
+              Top = 125
+              Width = 301
+              Align = alTop
+              BorderSpacing.Around = 5
+              Caption = 'Ikke færdig sidetal'
+              OnEditingDone = chbRulePartPagecountEditingDone
+              TabOrder = 5
+            end
+            object Panel67: TPanel
+              Left = 0
+              Height = 33
+              Top = 149
+              Width = 311
+              Align = alTop
+              AutoSize = True
+              BevelOuter = bvNone
+              ClientHeight = 33
+              ClientWidth = 311
+              TabOrder = 6
               object Label156: TLabel
                 Left = 5
                 Height = 23
@@ -900,7 +1072,7 @@ object fConvert: TfConvert
                 Width = 160
                 Align = alLeft
                 BorderSpacing.Around = 5
-                Caption = 'Insert a section remark:'
+                Caption = 'Sæt section remark:'
                 Constraints.MinWidth = 160
                 Layout = tlCenter
                 ParentColor = False
@@ -917,89 +1089,10 @@ object fConvert: TfConvert
               end
             end
           end
-          object GroupBox69: TGroupBox
-            Left = 0
-            Height = 185
-            Top = 185
-            Width = 315
-            Align = alTop
-            Caption = 'Creating metode'
-            ClientHeight = 165
-            ClientWidth = 311
-            TabOrder = 1
-            OnClick = GroupBox69Click
-            object chbRuleCreate: TCheckBox
-              Left = 5
-              Height = 19
-              Top = 5
-              Width = 301
-              Align = alTop
-              BorderSpacing.Around = 5
-              Caption = 'Create product if missing'
-              OnEditingDone = chbRuleCreateEditingDone
-              TabOrder = 0
-            end
-            object chbRuleSetUnique: TCheckBox
-              Left = 5
-              Height = 19
-              Top = 29
-              Width = 301
-              Align = alTop
-              BorderSpacing.Around = 5
-              Caption = 'Set only unique'
-              OnEditingDone = chbRuleSetUniqueEditingDone
-              TabOrder = 1
-            end
-            object chbRuleSetOnlyPageCount: TCheckBox
-              Left = 5
-              Height = 19
-              Top = 53
-              Width = 301
-              Align = alTop
-              BorderSpacing.Around = 5
-              Caption = 'Set only pagescount'
-              OnEditingDone = chbRuleSetOnlyPageCountEditingDone
-              TabOrder = 2
-            end
-            object chbRuleSearchInSecrem: TCheckBox
-              Left = 5
-              Height = 19
-              Top = 77
-              Width = 301
-              Align = alTop
-              BorderSpacing.Around = 5
-              Caption = 'Search production in section remark'
-              OnChange = chbRuleSearchInSecremChange
-              OnEditingDone = chbRuleSearchInSecremEditingDone
-              TabOrder = 3
-            end
-            object chbRuleAppendPagecount: TCheckBox
-              Left = 5
-              Height = 19
-              Top = 101
-              Width = 301
-              Align = alTop
-              BorderSpacing.Around = 5
-              Caption = 'Append sidetal til  produkt.'
-              OnEditingDone = chbRuleAppendPagecountEditingDone
-              TabOrder = 4
-            end
-            object chbRulePartPagecount: TCheckBox
-              Left = 5
-              Height = 19
-              Top = 125
-              Width = 301
-              Align = alTop
-              BorderSpacing.Around = 5
-              Caption = 'Ikke færdig sidetal.'
-              OnEditingDone = chbRulePartPagecountEditingDone
-              TabOrder = 5
-            end
-          end
           object GroupBox70: TGroupBox
             Left = 0
             Height = 144
-            Top = 370
+            Top = 483
             Width = 315
             Align = alTop
             AutoSize = True
@@ -1137,43 +1230,47 @@ object fConvert: TfConvert
         end
         object Panel1: TGroupBox
           Left = 5
-          Height = 587
+          Height = 631
           Top = 5
           Width = 256
           Align = alLeft
           BorderSpacing.Around = 5
-          Caption = 'Rules name'
-          ClientHeight = 567
+          Caption = 'Regler'
+          ClientHeight = 611
           ClientWidth = 252
           TabOrder = 2
           object ToolBar5: TToolBar
-            Left = 0
+            Left = 5
             Height = 24
-            Top = 0
-            Width = 252
+            Top = 5
+            Width = 242
             AutoSize = True
+            BorderSpacing.Around = 5
+            BorderSpacing.InnerBorder = 5
+            Color = clMenuBar
             List = True
+            ParentColor = False
             ShowCaptions = True
             TabOrder = 0
             object tbRulesAdd: TToolButton
               Left = 1
               Top = 2
-              Caption = 'Create new rule'
+              Caption = 'Opret ny regel'
               ImageIndex = 12
               OnClick = tbRulesAddClick
             end
             object tbRulesDelete: TToolButton
-              Left = 91
+              Left = 84
               Top = 2
-              Caption = 'Delete'
+              Caption = 'Slet regel'
               ImageIndex = 11
               OnClick = tbRulesDeleteClick
             end
           end
           object lwRuleName: TListView
             Left = 0
-            Height = 543
-            Top = 24
+            Height = 577
+            Top = 34
             Width = 252
             Align = alClient
             AutoWidthLastColumn = True
@@ -1253,6 +1350,18 @@ object fConvert: TfConvert
               end            
               item
                 Caption = 'PartPageCount'
+              end            
+              item
+                Caption = 'IsTurnSection'
+              end            
+              item
+                Caption = 'IsTurnSectionMaster'
+              end            
+              item
+                Caption = 'TurnSectionMaster'
+              end            
+              item
+                Caption = 'PageType'
               end>
             GridLines = True
             HideSelection = False
@@ -1267,9 +1376,116 @@ object fConvert: TfConvert
         end
         object Splitter1: TSplitter
           Left = 266
-          Height = 597
+          Height = 641
           Top = 0
           Width = 5
+        end
+      end
+    end
+    object TabSheet3: TTabSheet
+      Caption = 'Import defaults'
+      ClientHeight = 641
+      ClientWidth = 1071
+      object Panel9: TPanel
+        Left = 0
+        Height = 641
+        Top = 0
+        Width = 1071
+        Align = alClient
+        ClientHeight = 641
+        ClientWidth = 1071
+        TabOrder = 0
+        object GroupBox1: TGroupBox
+          Left = 8
+          Height = 192
+          Top = 16
+          Width = 640
+          Caption = 'Defaults'
+          ClientHeight = 172
+          ClientWidth = 636
+          TabOrder = 0
+          object Label5: TLabel
+            Left = 16
+            Height = 15
+            Top = 18
+            Width = 101
+            Caption = 'Vendesektionsnavn'
+            ParentColor = False
+          end
+          object EditTurnSectionDefault: TEdit
+            Left = 168
+            Height = 23
+            Top = 15
+            Width = 80
+            TabOrder = 0
+            Text = 'B'
+          end
+          object Label6: TLabel
+            Left = 16
+            Height = 15
+            Top = 56
+            Width = 136
+            Caption = 'Default rip-opsæt for trim'
+            ParentColor = False
+          end
+          object ComboBoxRipSetup: TComboBox
+            Left = 168
+            Height = 23
+            Top = 50
+            Width = 120
+            ItemHeight = 15
+            Style = csDropDownList
+            TabOrder = 1
+          end
+          object Label8: TLabel
+            Left = 15
+            Height = 15
+            Top = 92
+            Width = 139
+            Caption = 'Default trimformat bredde'
+            ParentColor = False
+          end
+          object Label9: TLabel
+            Left = 119
+            Height = 15
+            Top = 129
+            Width = 30
+            Caption = 'højde'
+            ParentColor = False
+            OnClick = Label9Click
+          end
+          object Label10: TLabel
+            Left = 304
+            Height = 15
+            Top = 18
+            Width = 187
+            Caption = '(Hvis masterprodukt kommer først)'
+            ParentColor = False
+          end
+          object Label11: TLabel
+            Left = 304
+            Height = 15
+            Top = 54
+            Width = 323
+            Caption = '(Trim-angivelse fra CrossAd kan overstyrer produkt-stamkort)'
+            ParentColor = False
+          end
+          object SpinTrimW: TSpinEdit
+            Left = 168
+            Height = 23
+            Top = 88
+            Width = 82
+            TabOrder = 2
+            Value = 265
+          end
+          object SpinTrimH: TSpinEdit
+            Left = 168
+            Height = 23
+            Top = 126
+            Width = 82
+            TabOrder = 3
+            Value = 370
+          end
         end
       end
     end
@@ -1277,7 +1493,7 @@ object fConvert: TfConvert
   object ButtonPanel1: TButtonPanel
     Left = 6
     Height = 34
-    Top = 636
+    Top = 680
     Width = 1077
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True

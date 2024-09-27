@@ -31,6 +31,9 @@ type
     cgEdition: TCheckGroup;
     cgZone: TCheckGroup;
     cgSection: TCheckGroup;
+    chbRuleTurnSection: TCheckBox;
+    ChbRuleMasterToTurnSection: TCheckBox;
+    ComboBoxRipSetup: TComboBox;
     deCrossAddDone: TDirectoryEdit;
     deCrossAddNoMatch: TDirectoryEdit;
     deCrossAddPath: TDirectoryEdit;
@@ -41,11 +44,15 @@ type
     Edit4: TEdit;
     Edit5: TEdit;
     Edit6: TEdit;
+    EditTurnSectionDefault: TEdit;
+    eRulePageType: TEdit;
     eRuleSecRem: TEdit;
     eRulesAlias: TEdit;
     eRulesEdi: TEdit;
+    eRuleMasterToTurnSection: TEdit;
     eRulesSec: TEdit;
     eRulesZon: TEdit;
+    GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
     GroupBox4: TGroupBox;
@@ -55,8 +62,12 @@ type
     GroupBox69: TGroupBox;
     GroupBox70: TGroupBox;
     Label1: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
     Label150: TLabel;
     Label151: TLabel;
+    Label152: TLabel;
+    Label153: TLabel;
     Label156: TLabel;
     Label158: TLabel;
     Label162: TLabel;
@@ -68,6 +79,10 @@ type
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
     Label96: TLabel;
     Label97: TLabel;
     Label98: TLabel;
@@ -94,9 +109,12 @@ type
     Panel66: TPanel;
     Panel67: TPanel;
     Panel68: TPanel;
+    Panel9: TPanel;
+    PanelTurnSection: TPanel;
     Panel7: TPanel;
     Panel73: TPanel;
     Panel8: TPanel;
+    PanelPageType: TPanel;
     ScrollBox1: TScrollBox;
     ScrollBox2: TScrollBox;
     ScrollBox3: TScrollBox;
@@ -105,9 +123,12 @@ type
     seRuleCommonStart: TSpinEdit;
     seRuleUniqueEnd: TSpinEdit;
     seRuleUniqueStart: TSpinEdit;
+    SpinTrimW: TSpinEdit;
+    SpinTrimH: TSpinEdit;
     Splitter1: TSplitter;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
+    TabSheet3: TTabSheet;
     tbDeleteZone: TToolButton;
     tbDeleteZone1: TToolButton;
     tbDeleteZone2: TToolButton;
@@ -127,6 +148,7 @@ type
     procedure chbRuleCreateEditingDone(Sender: TObject);
     procedure chbRuleForceCommonEditingDone(Sender: TObject);
     procedure chbRuleForceUniqueEditingDone(Sender: TObject);
+    procedure ChbRuleMasterToTurnSectionChange(Sender: TObject);
     procedure chbRulePartPagecountEditingDone(Sender: TObject);
     procedure chbRuleSearchInSecremChange(Sender: TObject);
     procedure chbRuleSearchInSecremEditingDone(Sender: TObject);
@@ -137,6 +159,10 @@ type
     procedure cgPronameItemClick(Sender: TObject; Index: integer);
     procedure cgSectionClick(Sender: TObject);
     procedure cgSectionItemClick(Sender: TObject; Index: integer);
+    procedure chbRuleTurnSectionChange(Sender: TObject);
+    procedure Edit7Change(Sender: TObject);
+    procedure eRuleMasterToTurnSectionChange(Sender: TObject);
+    procedure eRulePageTypeChange(Sender: TObject);
     procedure eRulesAliasChange(Sender: TObject);
     procedure eRuleSecRemChange(Sender: TObject);
     procedure eRulesEdiChange(Sender: TObject);
@@ -144,6 +170,7 @@ type
     procedure eRulesZonChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure GroupBox69Click(Sender: TObject);
+    procedure Label9Click(Sender: TObject);
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure ListView2SelectItem(Sender: TObject; Item: TListItem;
@@ -153,6 +180,7 @@ type
     procedure lwRuleNameSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure OKButtonClick(Sender: TObject);
+    procedure Panel68Click(Sender: TObject);
     procedure Panel8Click(Sender: TObject);
     procedure tbDeleteZone1Click(Sender: TObject);
     procedure tbDeleteZone2Click(Sender: TObject);
@@ -272,6 +300,14 @@ begin
       cgSection.Items.AddObject(Chr(i + 65), TObject(i));
     End;
 
+    // ### NAN 2024-08-21
+    ComboBoxRipSetup.Items.Clear;
+    for i:=0 to Length(fMain.Config.Names.RipSetups)-1 do
+    Begin
+      ComboBoxRipSetup.Items.Add( fMain.Config.Names.RipSetups[i].Name);
+    end;
+    ComboBoxRipSetup.ItemIndex := ComboBoxRipSetup.Items.IndexOf(fMain.Config.Convert.DefaultTrimRipSetup);
+    // ###
 
 
     INI := TINIFile.Create(fMain.Config.ConvertFileName);
@@ -285,9 +321,6 @@ begin
     Begin
       SLL.DelimitedText := INI.ReadString('Rule', SL[i], '');
       Li := lwRuleName.Items.Add;
-
-      y := SLL.Count;
-      y := lwRuleName.ColumnCount;
 
       While SLL.Count < lwRuleName.ColumnCount + 2  do
         SLL.Add(''); //Dette blot hvis der ikke er nok col
@@ -314,6 +347,11 @@ begin
 end;
 
 procedure TfConvert.GroupBox69Click(Sender: TObject);
+begin
+
+end;
+
+procedure TfConvert.Label9Click(Sender: TObject);
 begin
 
 end;
@@ -465,6 +503,8 @@ begin
   end;
 
 end;
+
+
 
 procedure TfConvert.chbRulePartPagecountEditingDone(Sender: TObject);
 begin
@@ -643,6 +683,40 @@ begin
 end;
 
 
+
+procedure TfConvert.Edit7Change(Sender: TObject);
+begin
+
+end;
+
+// ### NAN 2024-08-20
+procedure TfConvert.chbRuleTurnSectionChange(Sender: TObject);
+begin
+  PanelTurnSection.Enabled := chbRuleTurnSection.Checked;
+   If lwRuleName.SelCount = 1 then
+      lwRuleName.Selected.SubItems[21]:= BoolToStr(chbRuleTurnSection.Checked);
+end;
+
+// ### NAN 2024-08-20
+procedure TfConvert.ChbRuleMasterToTurnSectionChange(Sender: TObject);
+begin
+    If lwRuleName.SelCount = 1 then
+      lwRuleName.Selected.SubItems[22]:= BoolToStr(ChbRuleMasterToTurnSection.Checked);
+end;
+
+// ### NAN 2024-08-20
+procedure TfConvert.eRuleMasterToTurnSectionChange(Sender: TObject);
+begin
+  If lwRuleName.SelCount = 1 then
+      lwRuleName.Selected.SubItems[23]:= eRuleMasterToTurnSection.Text
+end;
+
+procedure TfConvert.eRulePageTypeChange(Sender: TObject);
+begin
+   If lwRuleName.SelCount = 1 then
+      lwRuleName.Selected.SubItems[24]:= eRulePageType.Text
+end;
+
 procedure TfConvert.ListView1SelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
   Panel2.Visible:= Selected;
@@ -688,6 +762,16 @@ begin
       chbRuleSearchInSecrem.Checked   := StrToBoolDef(lwRuleName.Selected.SubItems[18], false);
       chbRuleAppendPagecount.Checked  := StrToBoolDef(lwRuleName.Selected.SubItems[19], false);
       chbRulePartPagecount.Checked  := StrToBoolDef(lwRuleName.Selected.SubItems[20], false);
+
+      // ### NAN 2024-08-20 - nye felter for vendesektion
+      chbRuleTurnSection.Checked  := StrToBoolDef(lwRuleName.Selected.SubItems[21], false);
+      ChbRuleMasterToTurnSection.Checked := StrToBoolDef(lwRuleName.Selected.SubItems[22], false);
+      eRuleMasterToTurnSection.Text :=  lwRuleName.Selected.SubItems[23];
+      eRulePageType.Text  := lwRuleName.Selected.SubItems[24];
+
+      PanelTurnSection.Enabled := chbRuleTurnSection.Checked;
+
+
       sl := TStringlist.Create;
       sl.Delimiter:= ',';
 
@@ -751,6 +835,14 @@ begin
     INI.WriteString('Path', 'Input', deCrossAddPath.Text);
     INI.WriteString('Path', 'Filter', eCrossAddFIleFilter.Text);
     INI.WriteString('Path', 'No match', deCrossAddNoMatch.Text);
+
+    // ### NAN 2024-08-21 - nye defaults
+    INI.WriteString('System', 'DefaultTurnSectionName', EditTurnSectionDefault.Text);
+    INI.WriteString('System', 'DefaultTrimRipSetup', ComboBoxRipSetup.Text);
+    INI.WriteInteger('System',  'DefaultTrimFormatW',  SpinTrimW.Value);
+    INI.WriteInteger('System',  'DefaultTrimFormatH',  SpinTrimH.Value);
+    // ###
+
     INI.Free;
 
     INI := TINIFile.Create(fMain.Config.ConvertFileName);
@@ -795,6 +887,11 @@ begin
       fMain.EventLog.Error(E.Message);
     end;
   end;
+end;
+
+procedure TfConvert.Panel68Click(Sender: TObject);
+begin
+
 end;
 
 procedure TfConvert.Panel8Click(Sender: TObject);

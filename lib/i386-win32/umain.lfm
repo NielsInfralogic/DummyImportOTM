@@ -1,27 +1,27 @@
 object fMain: TfMain
   Left = 538
-  Height = 1008
+  Height = 504
   Top = 278
-  Width = 1682
-  Caption = 'Infralogic - Cross ad import v2'
-  ClientHeight = 1008
-  ClientWidth = 1682
-  DesignTimePPI = 192
+  Width = 841
+  Caption = 'Infralogic - CrossAd import OTM'
+  ClientHeight = 504
+  ClientWidth = 841
+  OnClose = FormClose
   OnCreate = FormCreate
   LCLVersion = '2.2.6.0'
   object lwLog: TListView
     Left = 0
-    Height = 884
-    Top = 80
-    Width = 1682
+    Height = 441
+    Top = 40
+    Width = 841
     Align = alClient
     AutoWidthLastColumn = True
     Columns = <    
       item
-        Width = 160
+        Width = 80
       end    
       item
-        Width = 1518
+        Width = 757
       end>
     ShowColumnHeaders = False
     TabOrder = 0
@@ -29,11 +29,11 @@ object fMain: TfMain
   end
   object ToolBar1: TToolBar
     Left = 0
-    Height = 80
+    Height = 40
     Top = 0
-    Width = 1682
-    ButtonHeight = 72
-    ButtonWidth = 68
+    Width = 841
+    ButtonHeight = 36
+    ButtonWidth = 34
     Caption = 'ToolBar1'
     Images = il32x32
     List = True
@@ -46,22 +46,15 @@ object fMain: TfMain
       ImageIndex = 0
       OnClick = ToolButton1Click
     end
-    object ToolButton2: TToolButton
-      Left = 100
-      Top = 2
-      Caption = 'Config'
-      ImageIndex = 1
-      OnClick = ToolButton2Click
-    end
     object ToolButton3: TToolButton
-      Left = 225
+      Left = 73
       Top = 2
       Caption = 'Convert setup'
       ImageIndex = 11
       OnClick = ToolButton3Click
     end
     object tbSimulate: TToolButton
-      Left = 745
+      Left = 392
       Top = 2
       Caption = 'Simulate'
       ImageIndex = 12
@@ -69,35 +62,35 @@ object fMain: TfMain
       Style = tbsCheck
     end
     object ToolButton5: TToolButton
-      Left = 610
-      Height = 72
+      Left = 299
+      Height = 36
       Top = 2
       Caption = 'ToolButton5'
       Style = tbsSeparator
     end
     object ToolButton6: TToolButton
-      Left = 92
-      Height = 72
+      Left = 65
+      Height = 36
       Top = 2
       Caption = 'ToolButton6'
       Style = tbsSeparator
     end
     object tbStatus: TToolButton
-      Left = 618
+      Left = 307
       Top = 2
       Caption = 'Status'
       ImageIndex = 9
       OnClick = tbStatusClick
     end
     object ToolButton4: TToolButton
-      Left = 737
-      Height = 72
+      Left = 384
+      Height = 36
       Top = 2
       Caption = 'ToolButton4'
       Style = tbsSeparator
     end
     object ToolButton7: TToolButton
-      Left = 429
+      Left = 192
       Top = 2
       Caption = 'Setup finish'
       ImageIndex = 13
@@ -106,15 +99,15 @@ object fMain: TfMain
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 44
-    Top = 964
-    Width = 1682
+    Height = 23
+    Top = 481
+    Width = 841
     Panels = <    
       item
         Width = 200
       end    
       item
-        Width = 100
+        Width = 50
       end>
     SimplePanel = False
   end
@@ -122,36 +115,36 @@ object fMain: TfMain
     Enabled = False
     Interval = 10000
     OnTimer = Timer1Timer
-    Left = 976
-    Top = 80
+    Left = 488
+    Top = 40
   end
   object SQLDBLibraryLoader: TSQLDBLibraryLoader
     Enabled = False
     ConnectionType = 'MSSQLServer'
     LibraryName = 'dblib_2008.dll'
-    Left = 1216
-    Top = 48
+    Left = 608
+    Top = 24
   end
   object MSSQLConnection: TMSSQLConnection
     Connected = False
     LoginPrompt = False
     KeepConnection = False
     Transaction = SQLTrans
-    Left = 1400
-    Top = 38
+    Left = 700
+    Top = 19
   end
   object SQLTrans: TSQLTransaction
     Active = False
     Database = MSSQLConnection
-    Left = 1422
-    Top = 172
+    Left = 711
+    Top = 86
   end
   object SQLQuery1: TSQLQuery
     FieldDefs = <>
     Params = <>
     Macros = <>
-    Left = 1444
-    Top = 326
+    Left = 722
+    Top = 163
   end
   object EventLog: TEventLog
     AppendContent = False
@@ -162,12 +155,12 @@ object fMain: TfMain
     CustomLogType = 0
     EventIDOffset = 0
     Paused = False
-    Left = 1232
-    Top = 228
+    Left = 616
+    Top = 114
   end
   object il16x16: TImageList
-    Left = 1592
-    Top = 296
+    Left = 796
+    Top = 148
     Bitmap = {
       4C7A1B00000010000000100000007F3D00000000000078DAEDBD07588FEFFBFF
       7FB54B2A24096D2144652764EFCCBC8DEC4DB2A58C862449F648114D151532DB
@@ -667,8 +660,8 @@ object fMain: TfMain
   object il32x32: TImageList
     Height = 32
     Width = 32
-    Left = 1626
-    Top = 40
+    Left = 813
+    Top = 20
     Bitmap = {
       4C7A0E0000002000000020000000BF5600000000000078DAEC7D05741459B775
       775C48881177214E88BBBBBBBB4090600324E8C0C0E030B84B707718DC3DB8BB

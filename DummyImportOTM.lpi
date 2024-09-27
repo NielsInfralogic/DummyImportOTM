@@ -19,8 +19,8 @@
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MajorVersionNr Value="1"/>
-      <MinorVersionNr Value="1"/>
+      <MajorVersionNr Value="2"/>
+      <MinorVersionNr Value="3"/>
       <RevisionNr Value="2"/>
       <StringTable Comments="OTM CrossAd Import" CompanyName="InfraLogic" LegalCopyright="(C) InfraLogic 2024"/>
     </VersionInfo>

@@ -248,7 +248,7 @@ begin
     end;
 
 
-    INI := TINIFile.Create(Form1.Config.CheckFinishfileName);
+    INI := TINIFile.Create(fMain.Config.CheckFinishfileName);
     SL := TStringList.Create;
     INI.ReadSections(SL);
 
